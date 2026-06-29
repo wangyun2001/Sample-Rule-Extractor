@@ -1,0 +1,142 @@
+{
+  "scene_id": "repair_inspection",
+  "scene_name": "??????",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "2.1.0",
+  "priority": "P2",
+  "description": "??????????????????????",
+  "context_keywords": [
+    "??",
+    "??",
+    "????",
+    "????",
+    "????",
+    "??"
+  ],
+  "title_aliases": [
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "inspection_item",
+    "inspection_method"
+  ],
+  "optional_semantic_roles": [
+    "inspection_target",
+    "judge_standard",
+    "followup_action",
+    "reference_section"
+  ],
+  "header_alias": {
+    "inspection_target": [
+      "????",
+      "???",
+      "??"
+    ],
+    "inspection_item": [
+      "????",
+      "???",
+      "??"
+    ],
+    "inspection_method": [
+      "????",
+      "????",
+      "??"
+    ],
+    "judge_standard": [
+      "????",
+      "????",
+      "??"
+    ],
+    "followup_action": [
+      "????",
+      "????",
+      "????"
+    ],
+    "reference_section": [
+      "??",
+      "????",
+      "????"
+    ]
+  },
+  "content_features": [
+    "???+??+????"
+  ],
+  "structure_patterns": [
+    "??|???|??|??|????"
+  ],
+  "output_schema": [
+    {
+      "field": "inspection_target",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "inspection_item",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "inspection_method",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "judge_standard",
+      "type": "string",
+      "required": false,
+      "description": "?????????"
+    },
+    {
+      "field": "followup_action",
+      "type": "string",
+      "required": false,
+      "description": "???????????"
+    },
+    {
+      "field": "reference_section",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "inspection_item??",
+    "inspection_method??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_table_or_bullets_with_standard"
+  },
+  "examples": []
+}

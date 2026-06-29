@@ -1,0 +1,70 @@
+{
+  "scene_id": "repair_install",
+  "scene_name": "维修方案步骤抽取-安装步骤抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "抽取安装流程中的步骤、对位要求、扭矩及提示。",
+  "context_keywords": ["安装", "步骤", "扭矩", "对位", "注意"],
+  "title_aliases": ["安装步骤", "安装流程", "装配步骤"],
+  "required_semantic_roles": ["操作名", "步骤号", "安装动作", "目标部件"],
+  "optional_semantic_roles": ["工具", "扭矩", "对位要求", "注意", "来源章节"],
+  "header_alias": {
+    "operation_name": ["操作名", "工序", "作业名称"],
+    "step_no": ["步骤号", "步骤", "序号"],
+    "install_action": ["安装动作", "装配动作", "动作"],
+    "target_part": ["目标部件", "部件", "目标件"],
+    "tool_name": ["工具", "工具名", "专用工具"],
+    "torque_value": ["扭矩", "力矩", "N·m"],
+    "alignment_requirement": ["对位要求", "定位要求", "安装方向"],
+    "notice_note": ["注意", "提示", "备注"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["步骤号清晰", "常出现先后顺序", "包含对位和紧固要求"],
+  "structure_patterns": ["步骤列表", "装配表格", "说明段落"],
+  "output_schema": [
+    { "field": "operation_name", "type": "string", "required": true, "description": "操作名称" },
+    { "field": "step_no", "type": "string", "required": true, "description": "步骤号" },
+    { "field": "install_action", "type": "string", "required": true, "description": "安装动作" },
+    { "field": "target_part", "type": "string", "required": true, "description": "目标部件" },
+    { "field": "tool_name", "type": "string", "required": false, "description": "工具名" },
+    { "field": "torque_value", "type": "string", "required": false, "description": "扭矩值" },
+    { "field": "alignment_requirement", "type": "string", "required": false, "description": "对位要求" },
+    { "field": "notice_note", "type": "string", "required": false, "description": "注意事项" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "alignment_requirement",
+      "from_alias": ["对齐", "定位", "对位"],
+      "semantic_hint": "描述位置关系的文本映射 alignment_requirement"
+    }
+  ],
+  "validation_rules": [
+    "step_no 不为空",
+    "install_action 不为空",
+    "target_part 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "preserve_step_order"
+  },
+  "examples": [
+    {
+      "input_excerpt": "步骤2：安装节气门体，按定位销对齐，拧紧至 12N·m。",
+      "output_record": {
+        "operation_name": "节气门安装",
+        "step_no": "2",
+        "install_action": "安装节气门体",
+        "target_part": "节气门体",
+        "tool_name": "套筒扳手",
+        "torque_value": "12N·m",
+        "alignment_requirement": "按定位销对齐",
+        "notice_note": "",
+        "source_section": "安装步骤"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "scene_id": "repair_inspection",
+  "scene_name": "维修方案步骤抽取-检查步骤抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P2",
+  "description": "抽取维修后的检查目标、项目、标准和异常动作。",
+  "context_keywords": ["检查", "检验", "判定标准", "异常处理", "确认"],
+  "title_aliases": ["检查步骤", "完工检查", "检验步骤"],
+  "required_semantic_roles": ["检查目标", "检查项目", "检查方法", "判定标准"],
+  "optional_semantic_roles": ["异常动作", "来源章节"],
+  "header_alias": {
+    "inspection_target": ["检查目标", "检测对象", "目标件"],
+    "inspection_item": ["检查项目", "检查项", "确认项"],
+    "inspection_method": ["检查方法", "检测方法", "确认方式"],
+    "judge_standard": ["判定标准", "标准", "合格条件"],
+    "abnormal_action": ["异常动作", "不合格处理", "异常处理"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["检查项与标准对应出现", "常见合格/不合格分支", "可能引用仪器"],
+  "structure_patterns": ["检查表", "分条步骤", "条件分支"],
+  "output_schema": [
+    { "field": "inspection_target", "type": "string", "required": true, "description": "检查目标" },
+    { "field": "inspection_item", "type": "string", "required": true, "description": "检查项目" },
+    { "field": "inspection_method", "type": "string", "required": true, "description": "检查方法" },
+    { "field": "judge_standard", "type": "string", "required": true, "description": "判定标准" },
+    { "field": "abnormal_action", "type": "string", "required": false, "description": "异常动作" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "abnormal_action",
+      "from_alias": ["异常", "不合格", "返修"],
+      "semantic_hint": "异常分支文本映射 abnormal_action"
+    }
+  ],
+  "validation_rules": [
+    "inspection_target 不为空",
+    "inspection_item 不为空",
+    "inspection_method 不为空",
+    "judge_standard 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "preserve_abnormal_branch"
+  },
+  "examples": [
+    {
+      "input_excerpt": "检查节气门间隙，标准 0.1~0.2mm，不合格则重新调整。",
+      "output_record": {
+        "inspection_target": "节气门",
+        "inspection_item": "间隙",
+        "inspection_method": "塞尺测量",
+        "judge_standard": "0.1~0.2mm",
+        "abnormal_action": "重新调整",
+        "source_section": "检查步骤"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "scene_id": "symptom_table",
+  "scene_name": "故障症状表抽取",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "抽取故障症状与可能原因、处理动作的对照表。",
+  "context_keywords": ["症状", "故障现象", "异常现象", "可能原因", "维修措施"],
+  "title_aliases": ["故障症状表", "症状与原因", "故障现象与处理"],
+  "required_semantic_roles": ["症状", "可能原因", "维修动作"],
+  "optional_semantic_roles": ["系统名称", "来源章节"],
+  "header_alias": {
+    "symptom": ["症状", "故障现象", "异常现象", "表现"],
+    "possible_cause": ["可能原因", "原因", "故障原因"],
+    "repair_action": ["维修动作", "处理措施", "修复方法", "建议操作"],
+    "system_name": ["系统", "系统名称", "子系统"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["表格结构常见", "行内可能包含症状+原因+措施", "症状文本通常较短"],
+  "structure_patterns": ["表头别名映射", "症状-原因-动作三元组", "分组章节"],
+  "output_schema": [
+    { "field": "symptom", "type": "string", "required": true, "description": "故障症状" },
+    { "field": "possible_cause", "type": "string", "required": true, "description": "可能原因" },
+    { "field": "repair_action", "type": "string", "required": true, "description": "维修动作" },
+    { "field": "system_name", "type": "string", "required": false, "description": "系统名称" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "symptom",
+      "from_alias": ["症状", "故障现象", "异常现象"],
+      "semantic_hint": "现象描述优先映射 symptom"
+    },
+    {
+      "target": "repair_action",
+      "from_alias": ["处理", "措施", "修复", "建议"],
+      "semantic_hint": "动作性文本映射 repair_action"
+    }
+  ],
+  "validation_rules": [
+    "symptom 不为空",
+    "possible_cause 与 repair_action 至少一项不为空",
+    "重复 symptom 可保留多条记录"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "keep_multiple_candidates"
+  },
+  "examples": [
+    {
+      "input_excerpt": "症状|可能原因|处理措施\n发动机抖动|点火线圈故障|更换点火线圈",
+      "output_record": {
+        "symptom": "发动机抖动",
+        "possible_cause": "点火线圈故障",
+        "repair_action": "更换点火线圈",
+        "system_name": "发动机系统",
+        "source_section": "故障症状表"
+      }
+    }
+  ]
+}

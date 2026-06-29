@@ -1,0 +1,162 @@
+{
+  "scene_id": "repair_remove",
+  "scene_name": "??????",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "2.1.0",
+  "priority": "P0",
+  "description": "??????????????????????",
+  "context_keywords": [
+    "??",
+    "??",
+    "??",
+    "??",
+    "??",
+    "??"
+  ],
+  "title_aliases": [
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "step_no",
+    "remove_action"
+  ],
+  "optional_semantic_roles": [
+    "target_part",
+    "tool_name",
+    "torque_value",
+    "warning_note",
+    "reference_section"
+  ],
+  "header_alias": {
+    "operation_name": [
+      "????",
+      "??"
+    ],
+    "step_no": [
+      "??",
+      "??",
+      "step"
+    ],
+    "remove_action": [
+      "????",
+      "??",
+      "????"
+    ],
+    "target_part": [
+      "????",
+      "??",
+      "???"
+    ],
+    "tool_name": [
+      "??",
+      "????"
+    ],
+    "torque_value": [
+      "??",
+      "??"
+    ],
+    "warning_note": [
+      "??",
+      "????",
+      "??"
+    ],
+    "reference_section": [
+      "??",
+      "????",
+      "????"
+    ]
+  },
+  "content_features": [
+    "??????",
+    "??????????"
+  ],
+  "structure_patterns": [
+    "??|??|???|??|??"
+  ],
+  "output_schema": [
+    {
+      "field": "operation_name",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "step_no",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "remove_action",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "target_part",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "tool_name",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "torque_value",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "warning_note",
+      "type": "string",
+      "required": false,
+      "description": "???????"
+    },
+    {
+      "field": "reference_section",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "step_no?remove_action??????"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_ordered_steps"
+  },
+  "examples": []
+}

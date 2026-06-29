@@ -1,0 +1,71 @@
+{
+  "scene_id": "dtc_fault_code",
+  "scene_name": "DTC 故障码抽取",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P2",
+  "description": "针对维修手册中的 DTC 章节，抽取故障码及诊断信息。",
+  "context_keywords": ["DTC", "故障码", "诊断代码", "触发条件", "可能原因"],
+  "title_aliases": ["DTC 信息", "故障码列表", "诊断故障码"],
+  "required_semantic_roles": ["故障码", "故障描述", "诊断步骤"],
+  "optional_semantic_roles": ["触发条件", "可能原因", "维修动作", "来源章节"],
+  "header_alias": {
+    "dtc_code": ["DTC", "故障码", "诊断代码"],
+    "dtc_name": ["名称", "故障名称", "代码名称"],
+    "fault_desc": ["故障描述", "故障说明", "故障现象"],
+    "trigger_condition": ["触发条件", "触发逻辑"],
+    "possible_cause": ["可能原因", "原因"],
+    "diagnostic_step": ["诊断步骤", "检查步骤"],
+    "repair_action": ["维修动作", "修复措施", "处理方法"],
+    "source_section": ["章节", "来源", "参考位置"]
+  },
+  "content_features": ["故障码通常形如 P0123", "同一行可能包含代码和描述", "章节中有可能嵌套子步骤"],
+  "structure_patterns": ["表格列", "代码+冒号文本", "分条步骤"],
+  "output_schema": [
+    { "field": "dtc_code", "type": "string", "required": true, "description": "故障码编码" },
+    { "field": "dtc_name", "type": "string", "required": true, "description": "故障码名称" },
+    { "field": "fault_desc", "type": "string", "required": true, "description": "故障描述" },
+    { "field": "trigger_condition", "type": "string", "required": false, "description": "触发条件" },
+    { "field": "possible_cause", "type": "string", "required": false, "description": "可能原因" },
+    { "field": "diagnostic_step", "type": "string", "required": false, "description": "诊断步骤" },
+    { "field": "repair_action", "type": "string", "required": false, "description": "维修动作" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "dtc_code",
+      "from_alias": ["DTC", "故障码", "诊断代码"],
+      "semantic_hint": "满足字母+数字编码形态优先映射为 dtc_code"
+    },
+    {
+      "target": "fault_desc",
+      "from_alias": ["故障描述", "故障说明", "异常说明"],
+      "semantic_hint": "描述类文本映射为 fault_desc"
+    }
+  ],
+  "validation_rules": [
+    "dtc_code 不应为空",
+    "dtc_code 建议匹配 [A-Z]\\d{3,4}",
+    "dtc_name 与 fault_desc 至少一项非空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "prefer_required_fields"
+  },
+  "examples": [
+    {
+      "input_excerpt": "DTC P0123 节气门位置传感器电压过高",
+      "output_record": {
+        "dtc_code": "P0123",
+        "dtc_name": "节气门位置传感器",
+        "fault_desc": "电压过高",
+        "trigger_condition": "",
+        "possible_cause": "",
+        "diagnostic_step": "",
+        "repair_action": "",
+        "source_section": "DTC章节"
+      }
+    }
+  ]
+}

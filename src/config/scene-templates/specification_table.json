@@ -1,0 +1,121 @@
+{
+  "scene_id": "specification_table",
+  "scene_name": "???????",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "??????/????/???????????",
+  "context_keywords": [
+    "??",
+    "??",
+    "???",
+    "??",
+    "??",
+    "??"
+  ],
+  "title_aliases": [
+    "??",
+    "????",
+    "????",
+    "???"
+  ],
+  "required_semantic_roles": [
+    "spec_item",
+    "spec_value"
+  ],
+  "optional_semantic_roles": [
+    "unit",
+    "condition"
+  ],
+  "header_alias": {
+    "spec_item": [
+      "??",
+      "???",
+      "???",
+      "??"
+    ],
+    "spec_value": [
+      "???",
+      "???",
+      "??",
+      "??"
+    ],
+    "unit": [
+      "??",
+      "unit"
+    ],
+    "condition": [
+      "??",
+      "????",
+      "??"
+    ]
+  },
+  "content_features": [
+    "??+????",
+    "???????"
+  ],
+  "structure_patterns": [
+    "??|???|??|??"
+  ],
+  "output_schema": [
+    {
+      "field": "spec_item",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "spec_value",
+      "type": "string",
+      "required": true,
+      "description": "??????"
+    },
+    {
+      "field": "unit",
+      "type": "string",
+      "required": false,
+      "description": "??"
+    },
+    {
+      "field": "condition",
+      "type": "string",
+      "required": false,
+      "description": "???????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "spec_item??",
+    "spec_value??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_numeric_cell_alignment"
+  },
+  "examples": []
+}

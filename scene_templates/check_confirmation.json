@@ -1,0 +1,60 @@
+{
+  "scene_id": "check_confirmation",
+  "scene_name": "检查与确认抽取",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "抽取检查分组、检查项目、判定标准与下一步动作。",
+  "context_keywords": ["检查", "确认", "判定标准", "下一步", "检测方法"],
+  "title_aliases": ["检查与确认", "检查项目", "检查标准"],
+  "required_semantic_roles": ["检查项目", "检查方法", "判定标准"],
+  "optional_semantic_roles": ["检查分组", "下一步", "来源章节"],
+  "header_alias": {
+    "check_group": ["分组", "检查分组", "项目组"],
+    "check_item": ["检查项目", "检查项", "确认项"],
+    "check_method": ["检查方法", "检测方法", "确认方法"],
+    "judge_standard": ["判定标准", "标准", "合格条件"],
+    "next_action": ["下一步", "后续动作", "下一操作"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["通常包含“如果...则...”", "包含判断结果和下一步动作", "可能以流程表出现"],
+  "structure_patterns": ["表格", "条件分支", "步骤清单"],
+  "output_schema": [
+    { "field": "check_group", "type": "string", "required": false, "description": "检查分组" },
+    { "field": "check_item", "type": "string", "required": true, "description": "检查项目" },
+    { "field": "check_method", "type": "string", "required": true, "description": "检查方法" },
+    { "field": "judge_standard", "type": "string", "required": true, "description": "判定标准" },
+    { "field": "next_action", "type": "string", "required": false, "description": "下一步动作" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "judge_standard",
+      "from_alias": ["标准", "条件", "判定"],
+      "semantic_hint": "出现合格/不合格条件时映射为 judge_standard"
+    }
+  ],
+  "validation_rules": [
+    "check_item 不为空",
+    "check_method 不为空",
+    "judge_standard 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "prefer_required_fields"
+  },
+  "examples": [
+    {
+      "input_excerpt": "检查项目|检查方法|判定标准|下一步\n电压检测|万用表测量|12V±0.5V|进入步骤2",
+      "output_record": {
+        "check_group": "电气检查",
+        "check_item": "电压检测",
+        "check_method": "万用表测量",
+        "judge_standard": "12V±0.5V",
+        "next_action": "进入步骤2",
+        "source_section": "检查确认表"
+      }
+    }
+  ]
+}

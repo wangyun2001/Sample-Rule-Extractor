@@ -1,0 +1,104 @@
+{
+  "scene_id": "visual_inspection_table",
+  "scene_name": "???????",
+  "scene_type": "primary",
+  "version": "2.1.0",
+  "priority": "P1",
+  "description": "????/?????????????????????",
+  "context_keywords": [
+    "????",
+    "????",
+    "????",
+    "???"
+  ],
+  "title_aliases": [
+    "?????",
+    "?????"
+  ],
+  "required_semantic_roles": [
+    "inspection_item",
+    "judge_standard"
+  ],
+  "optional_semantic_roles": [
+    "followup_action"
+  ],
+  "header_alias": {
+    "inspection_item": [
+      "???",
+      "????",
+      "????"
+    ],
+    "judge_standard": [
+      "????",
+      "??",
+      "????"
+    ],
+    "followup_action": [
+      "????",
+      "??",
+      "????"
+    ]
+  },
+  "content_features": [
+    "??????",
+    "??????????"
+  ],
+  "structure_patterns": [
+    "???|????|????"
+  ],
+  "output_schema": [
+    {
+      "field": "inspection_item",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "judge_standard",
+      "type": "string",
+      "required": true,
+      "description": "?????????"
+    },
+    {
+      "field": "followup_action",
+      "type": "string",
+      "required": false,
+      "description": "????????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "inspection_item??",
+    "judge_standard??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_header_aligned_row"
+  },
+  "examples": []
+}

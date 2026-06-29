@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+src-tauri/target/
+*.msi
+*.exe
+
+# Generated files
+python_runtime/generated/
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+.claude/
+.trae/
+.cargo/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Temporary
+tmp-*
+*.tmp
+
+# Test files with potential API keys
+test_alias_map.py
+test_project_alias_map.py
+
+# Debug/scratch files
+1.py
+cs.py
+
+# Large binary (use Git LFS if needed)
+# src-tauri/icons/
+
+# Chinese-named docs (keep in repo but can ignore if needed)
+# 场景管理配置优化分析报告.docx
+# 故障症状表场景.txt
+# 样本.txt

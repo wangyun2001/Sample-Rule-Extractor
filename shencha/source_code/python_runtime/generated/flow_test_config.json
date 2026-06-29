@@ -1,0 +1,152 @@
+{
+  "scene_id": "symptom_table",
+  "fields": [
+    {
+      "field": "symptom",
+      "type": "string",
+      "required": true,
+      "description": "故障症状"
+    },
+    {
+      "field": "possible_cause",
+      "type": "string",
+      "required": true,
+      "description": "可能原因"
+    },
+    {
+      "field": "repair_action",
+      "type": "string",
+      "required": true,
+      "description": "维修动作"
+    },
+    {
+      "field": "system_name",
+      "type": "string",
+      "required": false,
+      "description": "系统名称"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "来源章节"
+    }
+  ],
+  "analysis": {
+    "scene_id": "symptom_table",
+    "fields": [
+      "symptom",
+      "possible_cause",
+      "repair_action",
+      "system_name",
+      "source_section"
+    ],
+    "field_alias_map": {
+      "symptom": [
+        "症状",
+        "故障现象",
+        "异常现象",
+        "表现"
+      ],
+      "possible_cause": [
+        "可能原因",
+        "原因",
+        "故障原因"
+      ],
+      "repair_action": [
+        "维修动作",
+        "处理措施",
+        "修复方法",
+        "建议操作"
+      ],
+      "system_name": [
+        "系统",
+        "系统名称",
+        "子系统"
+      ],
+      "source_section": [
+        "章节",
+        "来源",
+        "页码"
+      ]
+    },
+    "extraction_hints": [
+      "症状",
+      "可能原因",
+      "维修动作",
+      "表格结构常见",
+      "行内可能包含症状+原因+措施",
+      "症状文本通常较短"
+    ],
+    "structure_guess": "table_like",
+    "constraints": [
+      "symptom 不为空",
+      "possible_cause 与 repair_action 至少一项不为空",
+      "重复 symptom 可保留多条记录"
+    ],
+    "validation_rules": [
+      "symptom 不为空",
+      "possible_cause 与 repair_action 至少一项不为空",
+      "重复 symptom 可保留多条记录"
+    ],
+    "fallback_policy": "ask_user_confirm_mapping",
+    "confidence": 0.86,
+    "notes": [
+      "flow test mock analysis"
+    ],
+    "llm_provider": "local-mock"
+  },
+  "adaptation": {
+    "scene_id": "symptom_table",
+    "structure_guess": "table_like",
+    "confidence": 0.86,
+    "field_patterns": {
+      "symptom": [
+        "症状\\s*[:：]\\s*(?P<value>.+)",
+        "故障现象\\s*[:：]\\s*(?P<value>.+)",
+        "异常现象\\s*[:：]\\s*(?P<value>.+)",
+        "表现\\s*[:：]\\s*(?P<value>.+)"
+      ],
+      "possible_cause": [
+        "可能原因\\s*[:：]\\s*(?P<value>.+)",
+        "原因\\s*[:：]\\s*(?P<value>.+)",
+        "故障原因\\s*[:：]\\s*(?P<value>.+)"
+      ],
+      "repair_action": [
+        "维修动作\\s*[:：]\\s*(?P<value>.+)",
+        "处理措施\\s*[:：]\\s*(?P<value>.+)",
+        "修复方法\\s*[:：]\\s*(?P<value>.+)",
+        "建议操作\\s*[:：]\\s*(?P<value>.+)"
+      ],
+      "system_name": [
+        "系统\\s*[:：]\\s*(?P<value>.+)",
+        "系统名称\\s*[:：]\\s*(?P<value>.+)",
+        "子系统\\s*[:：]\\s*(?P<value>.+)"
+      ],
+      "source_section": [
+        "章节\\s*[:：]\\s*(?P<value>.+)",
+        "来源\\s*[:：]\\s*(?P<value>.+)",
+        "页码\\s*[:：]\\s*(?P<value>.+)"
+      ]
+    },
+    "hints": [
+      "症状",
+      "可能原因",
+      "维修动作",
+      "表格结构常见",
+      "行内可能包含症状+原因+措施",
+      "症状文本通常较短"
+    ],
+    "constraints": [
+      "symptom 不为空",
+      "possible_cause 与 repair_action 至少一项不为空",
+      "重复 symptom 可保留多条记录"
+    ],
+    "validation_rules": [
+      "symptom 不为空",
+      "possible_cause 与 repair_action 至少一项不为空",
+      "重复 symptom 可保留多条记录"
+    ],
+    "fallback_policy": "ask_user_confirm_mapping"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "scene_id": "warning_notice",
+  "scene_name": "????????",
+  "scene_type": "primary",
+  "version": "2.1.0",
+  "priority": "P0",
+  "description": "????/??/?????????????",
+  "context_keywords": [
+    "??",
+    "??",
+    "??",
+    "??",
+    "??"
+  ],
+  "title_aliases": [
+    "??",
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "notice_type",
+    "content"
+  ],
+  "optional_semantic_roles": [
+    "trigger_context",
+    "risk_consequence"
+  ],
+  "header_alias": {
+    "notice_type": [
+      "??",
+      "????",
+      "????"
+    ],
+    "content": [
+      "??",
+      "????",
+      "??"
+    ],
+    "trigger_context": [
+      "????",
+      "????",
+      "???"
+    ],
+    "risk_consequence": [
+      "????",
+      "????",
+      "????"
+    ]
+  },
+  "content_features": [
+    "??????",
+    "???????"
+  ],
+  "structure_patterns": [
+    "??:xxx",
+    "??:xxx",
+    "??:xxx"
+  ],
+  "output_schema": [
+    {
+      "field": "notice_type",
+      "type": "string",
+      "required": true,
+      "description": "??/??/??"
+    },
+    {
+      "field": "content",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "trigger_context",
+      "type": "string",
+      "required": false,
+      "description": "?????????"
+    },
+    {
+      "field": "risk_consequence",
+      "type": "string",
+      "required": false,
+      "description": "?????????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "notice_type????/??/?????",
+    "content??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_nearest_operation_context"
+  },
+  "examples": []
+}

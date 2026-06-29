@@ -1,0 +1,128 @@
+{
+  "scene_id": "dtc_extraction",
+  "scene_name": "DTC ?????",
+  "scene_type": "primary",
+  "version": "2.1.0",
+  "priority": "P2",
+  "description": "?? DTC ???????????????????",
+  "context_keywords": [
+    "DTC",
+    "???",
+    "????",
+    "??????",
+    "????"
+  ],
+  "title_aliases": [
+    "DTC??",
+    "?????",
+    "DTC???"
+  ],
+  "required_semantic_roles": [
+    "dtc_code",
+    "fault_desc"
+  ],
+  "optional_semantic_roles": [
+    "possible_cause",
+    "repair_suggestion"
+  ],
+  "header_alias": {
+    "dtc_code": [
+      "DTC?",
+      "DTC",
+      "???",
+      "???"
+    ],
+    "fault_desc": [
+      "????",
+      "???????",
+      "????"
+    ],
+    "possible_cause": [
+      "??????",
+      "????",
+      "??"
+    ],
+    "repair_suggestion": [
+      "????",
+      "????",
+      "????"
+    ]
+  },
+  "content_features": [
+    "?????",
+    "DTC??????(P/U/B/C??)"
+  ],
+  "structure_patterns": [
+    "DTC?|????|??????|????"
+  ],
+  "output_schema": [
+    {
+      "field": "dtc_code",
+      "type": "string",
+      "required": true,
+      "description": "DTC?????P0101"
+    },
+    {
+      "field": "fault_desc",
+      "type": "string",
+      "required": true,
+      "description": "????????????"
+    },
+    {
+      "field": "possible_cause",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    },
+    {
+      "field": "repair_suggestion",
+      "type": "string",
+      "required": false,
+      "description": "?????????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [
+    {
+      "target": "dtc_code",
+      "from_alias": [
+        "DTC?",
+        "???"
+      ],
+      "semantic_hint": "?????????????????"
+    }
+  ],
+  "validation_rules": [
+    "dtc_code??",
+    "fault_desc??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_header_then_context"
+  },
+  "examples": []
+}

@@ -1,0 +1,67 @@
+{
+  "scene_id": "repair_remove",
+  "scene_name": "维修方案步骤抽取-拆卸步骤抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "抽取拆卸过程中的步骤、对象、工具和扭矩等关键信息。",
+  "context_keywords": ["拆卸", "步骤", "扭矩", "目标件", "警告"],
+  "title_aliases": ["拆卸步骤", "拆卸流程", "拆解步骤"],
+  "required_semantic_roles": ["操作名", "步骤号", "拆卸动作", "目标部件"],
+  "optional_semantic_roles": ["工具", "扭矩", "警告", "来源章节"],
+  "header_alias": {
+    "operation_name": ["操作名", "工序", "作业名称"],
+    "step_no": ["步骤号", "步骤", "序号"],
+    "remove_action": ["拆卸动作", "拆卸内容", "动作"],
+    "target_part": ["目标部件", "部件", "目标件"],
+    "tool_name": ["工具", "工具名", "专用工具"],
+    "torque_value": ["扭矩", "力矩", "N·m"],
+    "warning_note": ["警告", "注意", "风险提示"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["步骤编号明显", "动作动词以拆卸/取下开头", "常伴随安全提示"],
+  "structure_patterns": ["步骤列表", "流程表", "动作说明段落"],
+  "output_schema": [
+    { "field": "operation_name", "type": "string", "required": true, "description": "操作名称" },
+    { "field": "step_no", "type": "string", "required": true, "description": "步骤号" },
+    { "field": "remove_action", "type": "string", "required": true, "description": "拆卸动作" },
+    { "field": "target_part", "type": "string", "required": true, "description": "目标部件" },
+    { "field": "tool_name", "type": "string", "required": false, "description": "工具名" },
+    { "field": "torque_value", "type": "string", "required": false, "description": "扭矩值" },
+    { "field": "warning_note", "type": "string", "required": false, "description": "警告提示" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "remove_action",
+      "from_alias": ["拆卸", "取下", "松开"],
+      "semantic_hint": "包含拆卸动作动词的短语映射 remove_action"
+    }
+  ],
+  "validation_rules": [
+    "step_no 不为空",
+    "remove_action 不为空",
+    "target_part 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "preserve_step_order"
+  },
+  "examples": [
+    {
+      "input_excerpt": "步骤1：拆卸电池负极端子，使用10mm扳手。",
+      "output_record": {
+        "operation_name": "电池拆卸",
+        "step_no": "1",
+        "remove_action": "拆卸负极端子",
+        "target_part": "电池负极端子",
+        "tool_name": "10mm 扳手",
+        "torque_value": "",
+        "warning_note": "先断电",
+        "source_section": "拆卸步骤"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+﻿symptom,possible_cause,repair_action,system_name,source_section
+发动机抖动,点火线圈老化,更换点火线圈,,symptom_1.txt
+冷启动困难,喷油器积碳,清洗喷油器并复位学习值,,symptom_1.txt
+---,---,---,,symptom_2.md
+加速无力,节气门开度异常,检查节气门位置传感器并标定,,symptom_2.md
+"症状,可能原因,处理措施
+怠速不稳,进气泄漏,检查进气管并更换密封件",,,,symptom_3.csv
+"[
+  {
+    ""症状"": ""油耗升高"",
+    ""可能原因"": ""氧传感器老化"",
+    ""处理措施"": ""更换氧传感器并清除故障码""
+  }
+]",,,,symptom_4.json

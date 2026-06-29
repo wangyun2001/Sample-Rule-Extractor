@@ -1,0 +1,57 @@
+{
+  "scene_id": "warning_notice",
+  "scene_name": "警告与注意提示抽取",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "抽取警告、注意、提示等风险信息与关联操作。",
+  "context_keywords": ["警告", "注意", "风险", "禁止", "提示"],
+  "title_aliases": ["警告提示", "注意事项", "安全提示"],
+  "required_semantic_roles": ["提示类型", "内容"],
+  "optional_semantic_roles": ["关联操作", "风险对象", "来源章节"],
+  "header_alias": {
+    "notice_type": ["类型", "警告类型", "注意类型", "提示级别"],
+    "content": ["内容", "提示内容", "说明"],
+    "related_operation": ["关联操作", "适用操作", "相关步骤"],
+    "risk_object": ["风险对象", "风险部件", "风险后果"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["通常包含强提示词", "句式简短", "可能带有禁止性动作"],
+  "structure_patterns": ["图标+文本", "分栏提示", "列表提示"],
+  "output_schema": [
+    { "field": "notice_type", "type": "string", "required": true, "description": "提示类型" },
+    { "field": "content", "type": "string", "required": true, "description": "提示内容" },
+    { "field": "related_operation", "type": "string", "required": false, "description": "关联操作" },
+    { "field": "risk_object", "type": "string", "required": false, "description": "风险对象" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "notice_type",
+      "from_alias": ["警告", "注意", "危险", "提示"],
+      "semantic_hint": "根据语气强度映射 notice_type"
+    }
+  ],
+  "validation_rules": [
+    "notice_type 不为空",
+    "content 不为空",
+    "content 应保留原句完整性"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "keep_original_text"
+  },
+  "examples": [
+    {
+      "input_excerpt": "警告：拆卸燃油管前必须泄压。",
+      "output_record": {
+        "notice_type": "警告",
+        "content": "拆卸燃油管前必须泄压。",
+        "related_operation": "拆卸燃油管",
+        "risk_object": "燃油系统压力",
+        "source_section": "安全提示"
+      }
+    }
+  ]
+}

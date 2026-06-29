@@ -1,0 +1,119 @@
+{
+  "scene_id": "torque_spec",
+  "scene_name": "??????",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "?????????????????????????",
+  "context_keywords": [
+    "??",
+    "Nm",
+    "N?m",
+    "????",
+    "??"
+  ],
+  "title_aliases": [
+    "????",
+    "????",
+    "???"
+  ],
+  "required_semantic_roles": [
+    "target_part",
+    "torque_value"
+  ],
+  "optional_semantic_roles": [
+    "torque_unit",
+    "torque_note"
+  ],
+  "header_alias": {
+    "target_part": [
+      "??",
+      "??",
+      "???",
+      "???"
+    ],
+    "torque_value": [
+      "??",
+      "???",
+      "Nm",
+      "N?m"
+    ],
+    "torque_unit": [
+      "??",
+      "unit"
+    ],
+    "torque_note": [
+      "??",
+      "??",
+      "??"
+    ]
+  },
+  "content_features": [
+    "?????",
+    "????Nm"
+  ],
+  "structure_patterns": [
+    "??|??|??"
+  ],
+  "output_schema": [
+    {
+      "field": "target_part",
+      "type": "string",
+      "required": true,
+      "description": "????????"
+    },
+    {
+      "field": "torque_value",
+      "type": "string",
+      "required": true,
+      "description": "??????"
+    },
+    {
+      "field": "torque_unit",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "torque_note",
+      "type": "string",
+      "required": false,
+      "description": "???????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "target_part??",
+    "torque_value??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_value_with_unit"
+  },
+  "examples": []
+}

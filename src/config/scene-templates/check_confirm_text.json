@@ -1,0 +1,117 @@
+{
+  "scene_id": "check_confirm_text",
+  "scene_name": "???????",
+  "scene_type": "primary",
+  "version": "2.1.0",
+  "priority": "P0",
+  "description": "????????????????????????????",
+  "context_keywords": [
+    "?????",
+    "??????",
+    "????",
+    "????"
+  ],
+  "title_aliases": [
+    "?????",
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "check_item",
+    "check_method"
+  ],
+  "optional_semantic_roles": [
+    "check_target",
+    "abnormal_action"
+  ],
+  "header_alias": {
+    "check_target": [
+      "????",
+      "????"
+    ],
+    "check_item": [
+      "????",
+      "????",
+      "???"
+    ],
+    "check_method": [
+      "????",
+      "????",
+      "????"
+    ],
+    "abnormal_action": [
+      "????",
+      "????",
+      "?????"
+    ]
+  },
+  "content_features": [
+    "????+??",
+    "????????"
+  ],
+  "structure_patterns": [
+    "????...",
+    "???|??|????"
+  ],
+  "output_schema": [
+    {
+      "field": "check_target",
+      "type": "string",
+      "required": false,
+      "description": "?????????"
+    },
+    {
+      "field": "check_item",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "check_method",
+      "type": "string",
+      "required": true,
+      "description": "?????????"
+    },
+    {
+      "field": "abnormal_action",
+      "type": "string",
+      "required": false,
+      "description": "?????????????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "check_item??",
+    "check_method??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_actionable_sentence"
+  },
+  "examples": []
+}

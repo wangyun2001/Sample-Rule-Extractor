@@ -1,0 +1,23 @@
+[
+  {
+    "symptom": "发动机抖动",
+    "possible_cause": "点火线圈老化",
+    "repair_action": "更换点火线圈",
+    "system_name": "",
+    "source_section": "symptom_sample.txt"
+  },
+  {
+    "symptom": "冷启动困难",
+    "possible_cause": "喷油器积碳",
+    "repair_action": "清洗喷油器并复位学习值",
+    "system_name": "",
+    "source_section": "symptom_sample.txt"
+  },
+  {
+    "symptom": "加速无力",
+    "possible_cause": "节气门开度异常",
+    "repair_action": "检查节气门位置传感器并标定",
+    "system_name": "",
+    "source_section": "symptom_sample.txt"
+  }
+]

@@ -1,0 +1,234 @@
+﻿{
+  "scene_id": "symptom_table",
+  "scene_name": "故障症状表抽取",
+  "scene_type": "primary",
+  "version": "2.2.0",
+  "priority": "P0",
+  "description": "从维修手册故障现象诊断与测试相关章节中抽取‘症状-可能原因-措施’关系，兼容标准三列表、续行三列表、故障现象三列表、现象-原因二列表，以及标题给定症状的原因-维修方法二列表；严格排除诊断流程表和DTC表。",
+  "context_keywords": [
+    "故障症状表",
+    "症状表",
+    "故障现象诊断与测试",
+    "故障现象与诊断",
+    "常见故障症状表",
+    "常见原因及应对维修方法",
+    "症状",
+    "故障现象",
+    "可能原因",
+    "措施",
+    "维修方法"
+  ],
+  "title_aliases": [
+    "故障症状表",
+    "症状表",
+    "常见故障症状表",
+    "故障现象与诊断",
+    "故障症状诊断",
+    "常见原因及应对维修方法"
+  ],
+  "required_semantic_roles": [
+    "symptom"
+  ],
+  "optional_semantic_roles": [
+    "possible_cause",
+    "measure",
+    "system_name",
+    "source_section",
+    "source_title",
+    "source_table_type"
+  ],
+  "header_alias": {
+    "symptom": [
+      "症状",
+      "故障现象",
+      "故障症状",
+      "异常现象",
+      "现象"
+    ],
+    "possible_cause": [
+      "可能原因",
+      "原因",
+      "故障原因",
+      "常见原因"
+    ],
+    "measure": [
+      "措施",
+      "处理措施",
+      "维修措施",
+      "维修方法",
+      "处理方法",
+      "应对维修方法",
+      "对应维修方法",
+      "建议措施",
+      "维修建议"
+    ],
+    "source_table_type": [
+      "standard_triplet_table",
+      "fault_phenomenon_triplet_table",
+      "continuation_triplet_table",
+      "phenomenon_reason_table",
+      "cause_measure_table_with_title_symptom"
+    ]
+  },
+  "content_features": [
+    "主表型是症状-可能原因-措施三列",
+    "常见可能原因和措施的多行枚举",
+    "常见续行行: symptom为空但cause或measure非空",
+    "措施列允许‘参考某诊断流程’文本",
+    "system_name与source_section通常来自上级章节继承",
+    "存在现象-原因二列表弱兼容",
+    "存在标题给定症状的原因-维修方法二列表弱兼容"
+  ],
+  "structure_patterns": [
+    "症状|可能原因|措施",
+    "故障现象|可能原因|措施",
+    "症状列为空且可能原因/措施非空时继承上一行症状",
+    "现象|原因",
+    "可能原因|维修方法 + 标题含唯一症状"
+  ],
+  "output_schema": [
+    {
+      "field": "symptom",
+      "type": "string",
+      "required": true,
+      "description": "故障症状或故障现象；在续行或二列表场景可从上文继承"
+    },
+    {
+      "field": "possible_cause",
+      "type": "string",
+      "required": false,
+      "description": "可能原因（多行内容需拆分后拼接）"
+    },
+    {
+      "field": "measure",
+      "type": "string",
+      "required": false,
+      "description": "措施、维修方法或维修建议；允许‘参考某诊断流程’"
+    },
+    {
+      "field": "system_name",
+      "type": "string",
+      "required": false,
+      "description": "系统名，通常继承自上级系统标题"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "来源章节，通常继承自上级章节"
+    },
+    {
+      "field": "source_title",
+      "type": "string",
+      "required": false,
+      "description": "来源表标题或小节标题"
+    },
+    {
+      "field": "source_table_type",
+      "type": "string",
+      "required": false,
+      "description": "命中的表型名称"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "来源位置(页码/段落/表格坐标)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "抽取置信度(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "原始证据片段"
+    }
+  ],
+  "mapping_rules": [
+    {
+      "target": "symptom",
+      "from_alias": [
+        "症状",
+        "故障现象",
+        "故障症状",
+        "异常现象"
+      ],
+      "semantic_hint": "优先从表头别名提取；若当前行症状为空且符合续行条件则继承上一行"
+    },
+    {
+      "target": "symptom",
+      "from_alias": [
+        "标题症状"
+      ],
+      "semantic_hint": "当表头仅有可能原因+维修方法时，仅在上文标题存在唯一明确症状时继承到symptom"
+    },
+    {
+      "target": "possible_cause",
+      "from_alias": [
+        "可能原因",
+        "原因",
+        "故障原因",
+        "常见原因"
+      ],
+      "semantic_hint": "多行或分点原因需归并为结构化文本"
+    },
+    {
+      "target": "measure",
+      "from_alias": [
+        "措施",
+        "处理措施",
+        "维修方法",
+        "维修建议"
+      ],
+      "semantic_hint": "动作类处理建议映射到measure，‘参考某诊断流程’也视为有效措施"
+    },
+    {
+      "target": "system_name",
+      "from_alias": [
+        "上级系统标题"
+      ],
+      "semantic_hint": "优先使用上级上下文继承，不强依赖表头"
+    }
+  ],
+  "validation_rules": [
+    "优先识别三列表: 症状/故障现象 + 可能原因 + 措施",
+    "若命中测试条件/检测结果/后续步骤/判断标准等流程词，判定为diagnostic_flow并拒绝本场景",
+    "若命中DTC码/故障描述/维修建议等DTC词，判定为dtc_extraction并拒绝本场景",
+    "symptom不能为空；若续行则继承上一行symptom",
+    "possible_cause与measure至少一项非空",
+    "现象-原因二列表允许measure为空但需降置信度",
+    "原因-维修方法二列表仅在标题存在唯一症状时可入场，否则拒绝",
+    "若出现大量是/否分支、步骤编号、进入下一步等流程信号，则拒绝本场景"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_complete_triple_row_then_context_inheritance"
+  },
+  "examples": [
+    {
+      "input_excerpt": "| 症状 | 可能原因 | 措施 |\\n| 车辆跑偏 | 四轮定位错位 | 参考车辆跑偏诊断流程 |",
+      "output_record": {
+        "symptom": "车辆跑偏",
+        "possible_cause": "四轮定位错位",
+        "measure": "参考车辆跑偏诊断流程",
+        "source_table_type": "standard_triplet_table",
+        "confidence": "0.96"
+      }
+    },
+    {
+      "input_excerpt": "| 症状 | 可能原因 | 措施 |\\n| 冷却液流失 | 软管接头渗漏 | 检查软管接头 |\\n|  | 散热器泄漏 | 检查散热器 |",
+      "output_record": {
+        "symptom": "冷却液流失",
+        "possible_cause": "散热器泄漏",
+        "measure": "检查散热器",
+        "source_table_type": "continuation_triplet_table",
+        "confidence": "0.93"
+      }
+    }
+  ]
+}

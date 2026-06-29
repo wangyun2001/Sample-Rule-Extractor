@@ -1,0 +1,116 @@
+{
+  "scene_id": "repair_tool",
+  "scene_name": "????",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "2.1.0",
+  "priority": "P1",
+  "description": "?????????????????????",
+  "context_keywords": [
+    "????",
+    "??",
+    "??",
+    "??"
+  ],
+  "title_aliases": [
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "tool_name"
+  ],
+  "optional_semantic_roles": [
+    "tool_spec",
+    "is_special_tool",
+    "operation_name"
+  ],
+  "header_alias": {
+    "operation_name": [
+      "????",
+      "??",
+      "????"
+    ],
+    "tool_name": [
+      "????",
+      "??",
+      "??"
+    ],
+    "tool_spec": [
+      "????",
+      "??",
+      "??"
+    ],
+    "is_special_tool": [
+      "????",
+      "????",
+      "special_tool"
+    ]
+  },
+  "content_features": [
+    "??????",
+    "????????"
+  ],
+  "structure_patterns": [
+    "??|????|??|????"
+  ],
+  "output_schema": [
+    {
+      "field": "operation_name",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    },
+    {
+      "field": "tool_name",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "tool_spec",
+      "type": "string",
+      "required": false,
+      "description": "???????"
+    },
+    {
+      "field": "is_special_tool",
+      "type": "string",
+      "required": false,
+      "description": "??????(?/?)"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "tool_name??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_tool_table_rows"
+  },
+  "examples": []
+}

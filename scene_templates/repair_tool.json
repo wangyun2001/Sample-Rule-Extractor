@@ -1,0 +1,57 @@
+{
+  "scene_id": "repair_tool",
+  "scene_name": "维修方案步骤抽取-工具抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "抽取维修操作中涉及的工具及规格信息。",
+  "context_keywords": ["工具", "专用工具", "扳手", "规格", "型号"],
+  "title_aliases": ["工具清单", "维修工具", "专用工具列表"],
+  "required_semantic_roles": ["操作名", "工具名"],
+  "optional_semantic_roles": ["工具规格", "工具类型", "来源章节"],
+  "header_alias": {
+    "operation_name": ["操作名", "工序", "作业名称"],
+    "tool_name": ["工具", "工具名", "工装"],
+    "tool_spec": ["规格", "型号", "参数"],
+    "tool_type": ["类型", "工具类型", "类别"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["清单式结构", "工具名称可能有缩写", "规格与型号常并列"],
+  "structure_patterns": ["工具表", "列表", "段落清单"],
+  "output_schema": [
+    { "field": "operation_name", "type": "string", "required": true, "description": "操作名称" },
+    { "field": "tool_name", "type": "string", "required": true, "description": "工具名称" },
+    { "field": "tool_spec", "type": "string", "required": false, "description": "工具规格" },
+    { "field": "tool_type", "type": "string", "required": false, "description": "工具类型" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "tool_name",
+      "from_alias": ["工具", "专用工具", "工装"],
+      "semantic_hint": "名词性工具名称映射 tool_name"
+    }
+  ],
+  "validation_rules": [
+    "operation_name 不为空",
+    "tool_name 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "prefer_required_fields"
+  },
+  "examples": [
+    {
+      "input_excerpt": "操作：拆卸发动机罩；工具：套筒扳手；规格：10mm",
+      "output_record": {
+        "operation_name": "拆卸发动机罩",
+        "tool_name": "套筒扳手",
+        "tool_spec": "10mm",
+        "tool_type": "手动工具",
+        "source_section": "工具清单"
+      }
+    }
+  ]
+}

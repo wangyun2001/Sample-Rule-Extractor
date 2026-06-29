@@ -1,0 +1,140 @@
+{
+  "scene_id": "repair_cleaning",
+  "scene_name": "??????",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "2.0.0",
+  "priority": "P2",
+  "description": "????????????????/?????????",
+  "context_keywords": [
+    "??",
+    "??",
+    "???",
+    "??",
+    "??"
+  ],
+  "title_aliases": [
+    "????",
+    "????"
+  ],
+  "required_semantic_roles": [
+    "cleaning_target",
+    "cleaning_method"
+  ],
+  "optional_semantic_roles": [
+    "cleaning_tool",
+    "cleaning_agent",
+    "safety_note",
+    "forbidden_action"
+  ],
+  "header_alias": {
+    "cleaning_target": [
+      "????",
+      "???",
+      "??"
+    ],
+    "cleaning_method": [
+      "????",
+      "??",
+      "??"
+    ],
+    "cleaning_tool": [
+      "????",
+      "??"
+    ],
+    "cleaning_agent": [
+      "???",
+      "??",
+      "???"
+    ],
+    "safety_note": [
+      "????",
+      "????",
+      "??"
+    ],
+    "forbidden_action": [
+      "????",
+      "????",
+      "????"
+    ]
+  },
+  "content_features": [
+    "??+????????"
+  ],
+  "structure_patterns": [
+    "??|??|??|???|????"
+  ],
+  "output_schema": [
+    {
+      "field": "cleaning_target",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "cleaning_method",
+      "type": "string",
+      "required": true,
+      "description": "????"
+    },
+    {
+      "field": "cleaning_tool",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "cleaning_agent",
+      "type": "string",
+      "required": false,
+      "description": "???"
+    },
+    {
+      "field": "safety_note",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "forbidden_action",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "????"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "????(??/??/????)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "?????(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "??????"
+    }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "cleaning_target??",
+    "cleaning_method??"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_procedure_block"
+  },
+  "examples": []
+}

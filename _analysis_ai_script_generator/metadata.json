@@ -1,0 +1,10 @@
+{
+  "name": "AI脚本生成器",
+  "description": "Sample-driven scenario-based rule analysis and Python script generation tool for structured data extraction.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "AI Rule Analysis",
+    "Python Script Generation",
+    "Multi-format Extraction"
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "scene_id": "maintenance_fault_symptom_table",
+  "scene_name": "维修手册故障症状表抽取",
+  "scene_type": "primary",
+  "version": "2.0.0",
+  "priority": "P0",
+  "description": "从维修手册的故障现象诊断与测试相关章节中，抽取故障症状、可能原因和措施之间的对应关系。兼容标准三列表、续行三列表、故障现象三列表、现象-原因二列表，以及标题症状+原因-维修方法二列表，但严格排除诊断流程表和DTC表。",
+  "context_keywords": [
+    "故障症状表",
+    "症状表",
+    "故障现象诊断与测试",
+    "故障现象与诊断",
+    "常见故障症状表",
+    "常见原因及应对维修方法",
+    "常见原因及对应维修方法",
+    "症状",
+    "故障现象",
+    "可能原因",
+    "措施",
+    "维修方法"
+  ],
+  "title_aliases": [
+    "故障症状表",
+    "症状表",
+    "常见故障症状表",
+    "故障现象与诊断",
+    "故障症状诊断",
+    "常见原因及应对维修方法",
+    "常见原因及对应维修方法"
+  ],
+  "required_semantic_roles": [
+    "symptom_or_title_symptom"
+  ],
+  "optional_semantic_roles": [
+    "possible_cause",
+    "measure",
+    "system_name",
+    "source_section",
+    "source_title",
+    "source_table_type"
+  ],
+  "header_alias": {
+    "symptom": [
+      "症状",
+      "故障现象",
+      "故障症状",
+      "异常现象"
+    ],
+    "possible_cause": [
+      "可能原因",
+      "原因",
+      "故障原因",
+      "常见原因"
+    ],
+    "measure": [
+      "措施",
+      "处理措施",
+      "维修措施",
+      "维修方法",
+      "处理方法",
+      "应对维修方法",
+      "对应维修方法",
+      "建议措施",
+      "维修建议"
+    ]
+  },
+  "negative_header_alias": {
+    "diagnostic_flow": [
+      "测试条件",
+      "细节 / 结果 / 措施",
+      "细节/结果/措施",
+      "操作规范",
+      "判断标准",
+      "检测结果",
+      "后续步骤"
+    ],
+    "dtc_table": [
+      "DTC码",
+      "DTC 码",
+      "故障描述",
+      "故障类型与描述",
+      "可能故障原因",
+      "维修建议",
+      "诊断程序"
+    ]
+  },
+  "content_features": [
+    "高频出现在故障现象诊断与测试章节下",
+    "主表型为三列表：症状-可能原因-措施",
+    "措施字段中经常仅给出“参考某诊断流程”",
+    "可能原因单元格经常为多行枚举",
+    "措施单元格经常为多行枚举",
+    "存在 symptom 为空的续行行，需继承上一行症状",
+    "存在“故障现象”替代“症状”的表头变体",
+    "存在“现象-原因”二列表弱兼容形态",
+    "存在“可能原因-维修方法”二列表兼容形态，但通常依赖标题中的单一症状",
+    "system_name 通常来自最近上级系统标题而非表头",
+    "source_section 通常来自最近上级章节标题而非表头"
+  ],
+  "structure_patterns": [
+    {
+      "pattern_id": "P1_standard_triplet_table",
+      "name": "标准三列表",
+      "header_pattern": ["症状", "可能原因", "措施"],
+      "confidence": 1.0
+    },
+    {
+      "pattern_id": "P2_fault_phenomenon_triplet_table",
+      "name": "故障现象三列表",
+      "header_pattern": ["故障现象", "可能原因", "措施"],
+      "confidence": 0.96
+    },
+    {
+      "pattern_id": "P3_continuation_triplet_table",
+      "name": "续行三列表",
+      "header_pattern": ["症状", "可能原因", "措施"],
+      "row_pattern": "当前行symptom为空，possible_cause或measure非空，继承上一行symptom",
+      "confidence": 0.95
+    },
+    {
+      "pattern_id": "P4_phenomenon_reason_table",
+      "name": "现象-原因二列表",
+      "header_pattern": ["现象", "原因"],
+      "confidence": 0.72
+    },
+    {
+      "pattern_id": "P5_cause_measure_table_with_title_symptom",
+      "name": "标题症状 + 原因-维修方法二列表",
+      "header_pattern": ["可能原因", "维修方法"],
+      "extra_requirement": "表前或标题中必须存在唯一明确的故障现象/症状描述",
+      "confidence": 0.78
+    }
+  ],
+  "output_schema": [
+    {
+      "field": "symptom",
+      "type": "string",
+      "required": true,
+      "description": "故障症状或故障现象；若表中无该列，可从上方标题型单症状上下文继承"
+    },
+    {
+      "field": "possible_cause",
+      "type": "array[string]",
+      "required": false,
+      "description": "可能原因列表"
+    },
+    {
+      "field": "measure",
+      "type": "array[string]",
+      "required": false,
+      "description": "措施、维修措施、维修方法或维修建议列表"
+    },
+    {
+      "field": "system_name",
+      "type": "string",
+      "required": false,
+      "description": "所属系统名称，通常从最近上级系统标题继承"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "来源章节标题，通常从最近上级小节继承"
+    },
+    {
+      "field": "source_title",
+      "type": "string",
+      "required": false,
+      "description": "来源标题，例如故障症状表、常见原因及应对维修方法"
+    },
+    {
+      "field": "source_table_type",
+      "type": "string",
+      "required": true,
+      "description": "命中的表型，如standard_triplet_table、continuation_triplet_table、cause_measure_table_with_title_symptom"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": true,
+      "description": "单条记录置信度，取值0-1"
+    }
+  ],
+  "mapping_rules": [
+    {
+      "target": "symptom",
+      "from_alias": ["症状", "故障现象", "故障症状", "异常现象"],
+      "semantic_hint": "描述用户可感知异常表现的文本优先映射为 symptom",
+      "source_strategy": "header_alias_first"
+    },
+    {
+      "target": "symptom",
+      "from_alias": [],
+      "semantic_hint": "当表头仅有可能原因和维修方法时，且表前标题/上文存在唯一明确故障现象，则从标题继承 symptom",
+      "source_strategy": "inherit_from_nearest_unique_problem_title"
+    },
+    {
+      "target": "possible_cause",
+      "from_alias": ["可能原因", "原因", "故障原因", "常见原因"],
+      "semantic_hint": "解释故障来源、失效成因、异常根因的文本映射为 possible_cause",
+      "source_strategy": "header_alias_first"
+    },
+    {
+      "target": "measure",
+      "from_alias": ["措施", "处理措施", "维修措施", "维修方法", "处理方法", "应对维修方法", "对应维修方法", "建议措施", "维修建议"],
+      "semantic_hint": "表示处理、检查、更换、参考流程、申请支持等动作性文本映射为 measure",
+      "source_strategy": "header_alias_first"
+    },
+    {
+      "target": "system_name",
+      "from_alias": [],
+      "semantic_hint": "系统名通常不在表头中，应从最近上级系统章节继承，如悬架系统、空调系统、驱动轴等",
+      "source_strategy": "inherit_from_nearest_upper_system_title"
+    },
+    {
+      "target": "source_section",
+      "from_alias": [],
+      "semantic_hint": "来源章节通常来自最近上级小节标题，如 2.1.6 故障症状诊断",
+      "source_strategy": "inherit_from_nearest_upper_section_title"
+    },
+    {
+      "target": "source_title",
+      "from_alias": ["故障症状表", "常见故障症状表", "常见原因及应对维修方法", "常见原因及对应维修方法"],
+      "semantic_hint": "记录当前表或当前块的标题",
+      "source_strategy": "nearest_local_title"
+    }
+  ],
+  "validation_rules": [
+    "标准主场景优先命中三列表：症状/故障现象 + 可能原因 + 措施",
+    "若表头命中 测试条件/细节-结果-措施/操作规范/判断标准，则判定为诊断流程表，禁止进入本场景",
+    "若表头命中 DTC码/故障描述/可能故障原因/维修建议，则判定为DTC表，禁止进入本场景",
+    "symptom 必须非空；若当前行 symptom 为空但明显为续行，则继承上一行 symptom",
+    "possible_cause 与 measure 至少一项非空",
+    "possible_cause 和 measure 中的多行内容按 <br>、换行、项目符号拆分为数组",
+    "measure 仅为“参考某诊断流程”时，视为有效措施，不得丢弃",
+    "对于现象-原因二列表，可生成记录，但 measure 留空，置信度下降",
+    "对于可能原因-维修方法二列表，仅当标题中存在唯一明确 symptom 时允许生成记录，否则拒绝进入本场景",
+    "重复 symptom 允许保留多条记录，不强制去重",
+    "system_name 和 source_section 如无法从上下文确认，可留空",
+    "若标题为“常见故障症状表”但正文没有结构化表格，仅有枚举排查段落，则不按表格抽取",
+    "若行内出现大量 是/否/进入下一步/步骤编号/箭头分支，则判定为流程内容而非症状表行"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "flag_for_review",
+    "missing_fields": "leave_empty",
+    "conflict_resolution": "keep_multiple_candidates"
+  },
+  "examples": [
+    {
+      "input_excerpt": "| 症状 | 可能原因 | 措施 |\n| 车辆跑偏 | 车轮与轮胎<br>四轮定位<br>错位 | 请参考下面:车辆跑偏诊断流程 |",
+      "output_record": {
+        "symptom": "车辆跑偏",
+        "possible_cause": ["车轮与轮胎", "四轮定位", "错位"],
+        "measure": ["请参考下面:车辆跑偏诊断流程"],
+        "system_name": "悬架系统",
+        "source_section": "2.1.6 故障症状诊断",
+        "source_title": "故障症状表",
+        "source_table_type": "standard_triplet_table",
+        "confidence": 0.98
+      }
+    },
+    {
+      "input_excerpt": "| 症状 | 可能原因 | 措施 |\n| 冷却液流失 | 软管或接头 | 检查软管是否老化,软管接头处是否泄漏。 |\n|  | 散热器 | 检查散热器是否泄漏。 |",
+      "output_record": {
+        "symptom": "冷却液流失",
+        "possible_cause": ["软管或接头", "散热器"],
+        "measure": ["检查软管是否老化,软管接头处是否泄漏。", "检查散热器是否泄漏。"],
+        "system_name": "冷却系统",
+        "source_section": "故障现象与诊断",
+        "source_title": "故障症状表",
+        "source_table_type": "continuation_triplet_table",
+        "confidence": 0.96
+      }
+    },
+    {
+      "input_excerpt": "| 故障现象 | 可能原因 | 措施 |",
+      "output_record": {
+        "symptom": "从“故障现象”列抽取",
+        "possible_cause": [],
+        "measure": [],
+        "system_name": "",
+        "source_section": "",
+        "source_title": "故障症状表",
+        "source_table_type": "fault_phenomenon_triplet_table",
+        "confidence": 0.94
+      }
+    },
+    {
+      "input_excerpt": "| 现象 | 原因 |\n| 轮胎两侧快速磨损 | 轮胎充气不足(不进行轮胎换位) |",
+      "output_record": {
+        "symptom": "轮胎两侧快速磨损",
+        "possible_cause": ["轮胎充气不足(不进行轮胎换位)"],
+        "measure": [],
+        "system_name": "车轮和轮胎",
+        "source_section": "轮胎磨损检查",
+        "source_title": "",
+        "source_table_type": "phenomenon_reason_table",
+        "confidence": 0.72
+      }
+    },
+    {
+      "input_excerpt": "车机端无网络信号显示,且应用都不能联网\n常见原因及应对维修方法\n| 可能原因 | 维修方法 |\n| 1、SVDC 程序运行异常 | 对SVDC 进行重启操作 |",
+      "output_record": {
+        "symptom": "车机端无网络信号显示,且应用都不能联网",
+        "possible_cause": ["1、SVDC 程序运行异常"],
+        "measure": ["对SVDC 进行重启操作"],
+        "system_name": "",
+        "source_section": "3.2.1.14.2",
+        "source_title": "常见原因及应对维修方法",
+        "source_table_type": "cause_measure_table_with_title_symptom",
+        "confidence": 0.78
+      }
+    }
+  ]
+}

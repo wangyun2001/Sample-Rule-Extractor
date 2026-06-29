@@ -1,0 +1,44 @@
+[
+  {
+    "symptom": "发动机抖动",
+    "possible_cause": "点火线圈老化",
+    "repair_action": "更换点火线圈",
+    "system_name": "",
+    "source_section": "symptom_1.txt"
+  },
+  {
+    "symptom": "冷启动困难",
+    "possible_cause": "喷油器积碳",
+    "repair_action": "清洗喷油器并复位学习值",
+    "system_name": "",
+    "source_section": "symptom_1.txt"
+  },
+  {
+    "symptom": "---",
+    "possible_cause": "---",
+    "repair_action": "---",
+    "system_name": "",
+    "source_section": "symptom_2.md"
+  },
+  {
+    "symptom": "加速无力",
+    "possible_cause": "节气门开度异常",
+    "repair_action": "检查节气门位置传感器并标定",
+    "system_name": "",
+    "source_section": "symptom_2.md"
+  },
+  {
+    "symptom": "症状,可能原因,处理措施\r\n怠速不稳,进气泄漏,检查进气管并更换密封件",
+    "possible_cause": "",
+    "repair_action": "",
+    "system_name": "",
+    "source_section": "symptom_3.csv"
+  },
+  {
+    "symptom": "[\n  {\n    \"症状\": \"油耗升高\",\n    \"可能原因\": \"氧传感器老化\",\n    \"处理措施\": \"更换氧传感器并清除故障码\"\n  }\n]",
+    "possible_cause": "",
+    "repair_action": "",
+    "system_name": "",
+    "source_section": "symptom_4.json"
+  }
+]

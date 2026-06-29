@@ -1,0 +1,60 @@
+{
+  "scene_id": "repair_cleaning",
+  "scene_name": "维修方案步骤抽取-清洗步骤抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P2",
+  "description": "抽取清洗对象、方法、清洗剂和安全约束。",
+  "context_keywords": ["清洗", "清洁", "清洗剂", "禁止", "安全"],
+  "title_aliases": ["清洗步骤", "清洁作业", "清洗说明"],
+  "required_semantic_roles": ["清洗对象", "清洗方法"],
+  "optional_semantic_roles": ["清洗剂", "安全提示", "禁止动作", "来源章节"],
+  "header_alias": {
+    "cleaning_target": ["清洗对象", "清洁对象", "目标件"],
+    "cleaning_method": ["清洗方法", "清洁方式", "处理方法"],
+    "cleaning_agent": ["清洗剂", "清洁剂", "溶剂"],
+    "safety_note": ["安全提示", "注意", "警告"],
+    "forbidden_action": ["禁止动作", "禁止事项", "禁用操作"],
+    "source_section": ["章节", "来源", "页码"]
+  },
+  "content_features": ["强调介质与方法", "常见禁止语句", "可能包含 PPE 要求"],
+  "structure_patterns": ["清单", "分点说明", "流程步骤"],
+  "output_schema": [
+    { "field": "cleaning_target", "type": "string", "required": true, "description": "清洗目标" },
+    { "field": "cleaning_method", "type": "string", "required": true, "description": "清洗方法" },
+    { "field": "cleaning_agent", "type": "string", "required": false, "description": "清洗剂" },
+    { "field": "safety_note", "type": "string", "required": false, "description": "安全提示" },
+    { "field": "forbidden_action", "type": "string", "required": false, "description": "禁止动作" },
+    { "field": "source_section", "type": "string", "required": false, "description": "来源章节" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "forbidden_action",
+      "from_alias": ["禁止", "不得", "严禁"],
+      "semantic_hint": "禁止性语句映射 forbidden_action"
+    }
+  ],
+  "validation_rules": [
+    "cleaning_target 不为空",
+    "cleaning_method 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "prefer_required_fields"
+  },
+  "examples": [
+    {
+      "input_excerpt": "使用专用清洗剂清洗喷油嘴，禁止使用金属刷。",
+      "output_record": {
+        "cleaning_target": "喷油嘴",
+        "cleaning_method": "专用清洗剂浸泡清洗",
+        "cleaning_agent": "专用清洗剂",
+        "safety_note": "",
+        "forbidden_action": "禁止使用金属刷",
+        "source_section": "清洗步骤"
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "scene_id": "diagnosis_flow",
+  "scene_name": "诊断流程表抽取",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "抽取诊断流程节点、判断分支和下一步动作。",
+  "context_keywords": ["流程", "步骤", "判断", "下一步", "分支"],
+  "title_aliases": ["诊断流程", "故障诊断流程", "流程图步骤"],
+  "required_semantic_roles": ["流程名", "步骤号", "动作", "下一步"],
+  "optional_semantic_roles": ["测试条件", "判断结果", "细节说明"],
+  "header_alias": {
+    "flow_name": ["流程名", "流程", "诊断流程"],
+    "step_no": ["步骤号", "Step", "序号"],
+    "test_condition": ["测试条件", "前置条件", "条件"],
+    "detail": ["详情", "说明", "描述"],
+    "decision": ["判断", "判定", "结果"],
+    "action": ["动作", "处理", "执行项"],
+    "next_step": ["下一步", "下步", "去向步骤"]
+  },
+  "content_features": ["常见 if/else 分支", "步骤号递增", "可能有 YES/NO 路径"],
+  "structure_patterns": ["流程表", "条件分支文本", "步骤块"],
+  "output_schema": [
+    { "field": "flow_name", "type": "string", "required": true, "description": "流程名称" },
+    { "field": "step_no", "type": "string", "required": true, "description": "步骤号" },
+    { "field": "test_condition", "type": "string", "required": false, "description": "测试条件" },
+    { "field": "detail", "type": "string", "required": false, "description": "细节说明" },
+    { "field": "decision", "type": "string", "required": false, "description": "判断结果" },
+    { "field": "action", "type": "string", "required": true, "description": "动作" },
+    { "field": "next_step", "type": "string", "required": true, "description": "下一步" }
+  ],
+  "mapping_rules": [
+    {
+      "target": "step_no",
+      "from_alias": ["步骤", "Step", "序号"],
+      "semantic_hint": "步骤编号字段映射 step_no"
+    }
+  ],
+  "validation_rules": [
+    "flow_name 不为空",
+    "step_no 不为空",
+    "action 不为空",
+    "next_step 不为空"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "fill_empty_string",
+    "conflict_resolution": "preserve_branch_text"
+  },
+  "examples": [
+    {
+      "input_excerpt": "步骤1 检查电源电压，正常转步骤2，异常更换保险丝。",
+      "output_record": {
+        "flow_name": "电源诊断流程",
+        "step_no": "1",
+        "test_condition": "检查电源电压",
+        "detail": "电压测量",
+        "decision": "正常/异常",
+        "action": "异常时更换保险丝",
+        "next_step": "2"
+      }
+    }
+  ]
+}

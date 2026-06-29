@@ -1,0 +1,309 @@
+﻿{
+  "scene_id": "diagnostic_flow",
+  "scene_name": "维修手册诊断流程表抽取",
+  "scene_type": "primary",
+  "version": "2.2.0",
+  "priority": "P0",
+  "description": "从维修手册中的故障诊断流程、故障检修流程图、检查流程表中抽取步骤化诊断信息，覆盖测试条件-细节/结果/措施表、操作规范-判断标准表和检查项-检查及维修方法表；严格排除故障症状表、DTC代码表、规格表和零件分解表。",
+  "context_keywords": [
+    "故障诊断流程",
+    "诊断流程",
+    "故障检修流程图",
+    "测试条件",
+    "细节 / 结果 / 措施",
+    "细节/结果/措施",
+    "操作规范",
+    "判断标准",
+    "至步骤",
+    "下一步",
+    "是否",
+    "→是",
+    "→否"
+  ],
+  "title_aliases": [
+    "故障诊断流程",
+    "诊断流程",
+    "故障检修流程图",
+    "检查流程",
+    "诊断流程图",
+    "问题检查",
+    "问题排查流程"
+  ],
+  "required_semantic_roles": [
+    "step_or_condition"
+  ],
+  "optional_semantic_roles": [
+    "flow_name",
+    "step_no",
+    "step_detail",
+    "check_result",
+    "measure",
+    "decision_branch",
+    "next_step",
+    "reference_section",
+    "system_name",
+    "source_section",
+    "source_title",
+    "source_table_type"
+  ],
+  "header_alias": {
+    "step_or_condition": [
+      "测试条件",
+      "检查项",
+      "步骤",
+      "步骤编号",
+      "操作规范",
+      "故障",
+      "项目"
+    ],
+    "step_detail": [
+      "细节 / 结果 / 措施",
+      "细节/结果/措施",
+      "检查及维修方法",
+      "操作步骤",
+      "细节",
+      "结果",
+      "说明"
+    ],
+    "check_result": [
+      "判断标准",
+      "结果",
+      "检测结果"
+    ],
+    "measure": [
+      "措施",
+      "处理措施",
+      "维修建议",
+      "检查及维修方法",
+      "后续步骤",
+      "诊断程序"
+    ],
+    "decision_branch": [
+      "是否",
+      "→是",
+      "→否",
+      "正常",
+      "异常"
+    ],
+    "next_step": [
+      "至步骤",
+      "下一步",
+      "后续步骤",
+      "结束排查"
+    ]
+  },
+  "content_features": [
+    "高频出现在故障现象诊断与测试章节",
+    "常见于DTC诊断与测试章节下的流程段",
+    "主表型是测试条件-细节/结果/措施两列表",
+    "分支判断语句高频出现: 是否正常/是否有故障",
+    "跳转语句高频出现: →是,至步骤X；→否,维修/更换/结束排查",
+    "步骤常以数字或A/B/C子步骤开头",
+    "大量出现参考:xxx或请参考:xxx"
+  ],
+  "structure_patterns": [
+    "测试条件|细节 / 结果 / 措施",
+    "测试条件|细节/结果/措施",
+    "操作规范|判断标准",
+    "检查项|检查及维修方法",
+    "步骤 + 条件判断 + 分支跳转 + 后续动作"
+  ],
+  "output_schema": [
+    {
+      "field": "flow_name",
+      "type": "string",
+      "required": false,
+      "description": "流程名称，如轮速传感器诊断流程"
+    },
+    {
+      "field": "step_no",
+      "type": "string",
+      "required": false,
+      "description": "步骤编号，如1/2/3或A/B子步骤"
+    },
+    {
+      "field": "step_or_condition",
+      "type": "string",
+      "required": true,
+      "description": "步骤标题、测试条件、检查项或操作规范"
+    },
+    {
+      "field": "step_detail",
+      "type": "string",
+      "required": false,
+      "description": "步骤细节、操作说明、检测动作和标准值"
+    },
+    {
+      "field": "check_result",
+      "type": "string",
+      "required": false,
+      "description": "判断结果、判断标准、是否类问题"
+    },
+    {
+      "field": "decision_branch",
+      "type": "string",
+      "required": false,
+      "description": "分支判断，如→是、→否、正常、异常"
+    },
+    {
+      "field": "measure",
+      "type": "string",
+      "required": false,
+      "description": "处理措施、维修动作、后续动作、终止条件"
+    },
+    {
+      "field": "next_step",
+      "type": "string",
+      "required": false,
+      "description": "跳转信息，如至步骤2、结束排查"
+    },
+    {
+      "field": "reference_section",
+      "type": "string",
+      "required": false,
+      "description": "参考章节，如参考:前摆臂总成"
+    },
+    {
+      "field": "system_name",
+      "type": "string",
+      "required": false,
+      "description": "所属系统名称，通常从上级章节继承"
+    },
+    {
+      "field": "source_section",
+      "type": "string",
+      "required": false,
+      "description": "来源章节标题"
+    },
+    {
+      "field": "source_title",
+      "type": "string",
+      "required": false,
+      "description": "来源局部标题"
+    },
+    {
+      "field": "source_table_type",
+      "type": "string",
+      "required": false,
+      "description": "命中的流程表型"
+    },
+    {
+      "field": "source_location",
+      "type": "string",
+      "required": false,
+      "description": "来源位置(页码/段落/表格坐标)"
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "required": false,
+      "description": "单条记录置信度(0-1)"
+    },
+    {
+      "field": "raw_evidence",
+      "type": "string",
+      "required": false,
+      "description": "原始证据片段"
+    }
+  ],
+  "mapping_rules": [
+    {
+      "target": "flow_name",
+      "from_alias": [
+        "故障诊断流程",
+        "诊断流程",
+        "故障检修流程图",
+        "问题检查"
+      ],
+      "semantic_hint": "优先从最近局部标题抽取流程名"
+    },
+    {
+      "target": "step_no",
+      "from_alias": [
+        "步骤前缀"
+      ],
+      "semantic_hint": "从步骤标题前缀解析数字或A/B/C子步骤"
+    },
+    {
+      "target": "step_or_condition",
+      "from_alias": [
+        "测试条件",
+        "检查项",
+        "步骤",
+        "操作规范"
+      ],
+      "semantic_hint": "描述当前检查对象、条件或步骤标题"
+    },
+    {
+      "target": "step_detail",
+      "from_alias": [
+        "细节 / 结果 / 措施",
+        "细节/结果/措施",
+        "检查及维修方法",
+        "操作步骤"
+      ],
+      "semantic_hint": "A/B/C分项动作、标准值和检测说明映射为step_detail"
+    },
+    {
+      "target": "check_result",
+      "from_alias": [
+        "判断标准",
+        "结果",
+        "检测结果"
+      ],
+      "semantic_hint": "显式结果判断和阈值范围"
+    },
+    {
+      "target": "decision_branch",
+      "from_alias": [
+        "→是",
+        "→否",
+        "正常",
+        "异常"
+      ],
+      "semantic_hint": "分支条件独立保留，不混入measure"
+    },
+    {
+      "target": "next_step",
+      "from_alias": [
+        "至步骤",
+        "下一步",
+        "结束排查"
+      ],
+      "semantic_hint": "跳转路径单独保留，不混入step_detail"
+    }
+  ],
+  "validation_rules": [
+    "优先命中测试条件-细节/结果/措施两列表",
+    "若命中症状-可能原因-措施表头，则切换symptom_table",
+    "若命中DTC码/故障描述/可能故障原因/维修建议，则切换dtc_extraction",
+    "step_or_condition必须非空",
+    "step_detail、check_result、measure、next_step至少一项非空",
+    "decision_branch单独保留，不与measure混合",
+    "next_step单独保留，不与step_detail混合",
+    "操作规范-判断标准和检查项-检查及维修方法可作为兼容流程型，置信度低于标准流程表",
+    "若仅有说明性段落且无步骤/条件/分支/跳转，则不进入本场景"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "ask_user_confirm_mapping",
+    "missing_fields": "leave_empty_with_note",
+    "conflict_resolution": "prefer_branch_and_step_consistency"
+  },
+  "examples": [
+    {
+      "input_excerpt": "集成制动控制模块诊断流程\\n| 测试条件 | 细节 / 结果 / 措施 |\\n| 1. 检查蓄电池电压 | A.车辆上电。B.测量电压。标准值:10~16V。是否电压正常? →是,至步骤2。→否,参考蓄电池充电电压太低。 |",
+      "output_record": {
+        "flow_name": "集成制动控制模块诊断流程",
+        "step_no": "1",
+        "step_or_condition": "检查蓄电池电压",
+        "step_detail": "车辆上电；测量电压；标准值:10~16V",
+        "check_result": "是否电压正常?",
+        "decision_branch": "→是；→否",
+        "next_step": "至步骤2",
+        "reference_section": "参考:蓄电池充电电压太低",
+        "source_table_type": "standard_diagnostic_flow_table",
+        "confidence": "0.98"
+      }
+    }
+  ]
+}
