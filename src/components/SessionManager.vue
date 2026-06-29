@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { useSessionList } from "../composables/useSessionList";
 import { t } from "../i18n/messages";
+import SessionVersionBadge from "./SessionVersionBadge.vue";
 
-const { store, sessionStore, current, query, statusFilter, filteredRecords, formatTime, openSession } = useSessionList();
+const { store, sessionStore, sceneStore, current, query, statusFilter, filteredRecords, formatTime, openSession } = useSessionList();
+
+function getSceneName(sceneId: string): string {
+  const def = sceneStore.definitions.find((d) => d.sceneId === sceneId);
+  return def?.name ?? sceneId;
+}
 </script>
 
 <template>
@@ -35,6 +41,14 @@ const { store, sessionStore, current, query, statusFilter, filteredRecords, form
         @click="openSession(item.session_id)"
       >
         <div class="session-title">{{ item.title }}</div>
+        <div class="session-badge-row">
+          <SessionVersionBadge
+            :binding="item.sceneBinding"
+            :version-mismatch="item.versionMismatch"
+            :language="store.language"
+            :scene-name="getSceneName(item.primary_scene)"
+          />
+        </div>
         <div class="session-meta">
           <span>{{ item.status === "completed" ? t(store.language, "common.completed") : t(store.language, "common.inProgress") }}</span>
           <span>{{ item.progress }}%</span>
@@ -60,3 +74,9 @@ const { store, sessionStore, current, query, statusFilter, filteredRecords, form
     </div>
   </section>
 </template>
+
+<style scoped>
+.session-badge-row {
+  margin: 2px 0;
+}
+</style>

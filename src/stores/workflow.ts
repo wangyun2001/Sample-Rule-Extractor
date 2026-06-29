@@ -384,6 +384,20 @@ export const useWorkflowStore = defineStore("workflow", {
         this.stepStatus.step3 = "current";
       }
 
+      // Build scene version binding
+      const sceneStore = useSceneStore();
+      const activeVersion = sceneStore.getActiveVersion(primaryScene);
+      const template = sceneStore.getTemplateForScene(primaryScene, subScene);
+      const sceneBinding = activeVersion && template
+        ? {
+            sceneId: primaryScene,
+            sceneVersionId: activeVersion.versionId,
+            templateVersion: activeVersion.semanticVersion || template.version || "unknown",
+            templateChecksum: activeVersion.checksum || "",
+            templateSnapshot: deepCopy(template)
+          }
+        : undefined;
+
       // Delegate session creation
       const sessionStore = useSessionStore();
       sessionStore.createSessionByScene(
@@ -392,7 +406,8 @@ export const useWorkflowStore = defineStore("workflow", {
         this.sample.selected_text,
         this.stepStatus,
         this.activeStep,
-        this.captureSnapshot()
+        this.captureSnapshot(),
+        sceneBinding
       );
       this.syncSessionEvent(2, "scene_selected", `primary=${primaryScene}, sub=${subScene || "-"}`);
     },
@@ -501,6 +516,7 @@ export const useWorkflowStore = defineStore("workflow", {
         return;
       }
       const active = llmStore.getActiveLlmConfig();
+      const activeVersion = sceneStore.getActiveVersion(this.scene.primary_scene);
       const promptOverride = promptStore.rulePrompt.template
         .replace("{{primary_scene}}", this.scene.primary_scene || "")
         .replace("{{sub_scene}}", this.scene.sub_scene || "")
@@ -515,6 +531,8 @@ export const useWorkflowStore = defineStore("workflow", {
             primary_scene: this.scene.primary_scene,
             sub_scene: this.scene.sub_scene,
             template,
+            template_version: activeVersion?.semanticVersion || template.version || "unknown",
+            template_checksum: activeVersion?.checksum || "",
             llm_config: {
               api_base_url: active.api_base_url,
               api_key: active.api_key,

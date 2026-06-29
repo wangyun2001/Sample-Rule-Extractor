@@ -15,6 +15,8 @@ import {
 import { getSceneRepository } from "../services/sceneRepository";
 import { seedBuiltinTemplates } from "../services/sceneSeedService";
 import { checkPublishGate } from "../services/sceneValidator";
+import { diffVersions } from "../services/sceneVersioning";
+import type { VersionDiff } from "../types/sceneStudio";
 import { deepCopy } from "../utils/copy";
 
 interface SceneStoreState {
@@ -299,6 +301,28 @@ export const useSceneStore = defineStore("scene", {
         return { passed: false, blockers: ["场景或版本不存在"], warnings: [] };
       }
       return checkPublishGate(def, version.template, version.testCases);
+    },
+
+    /** 加载指定场景的版本列表到缓存 */
+    async loadVersions(sceneId: string): Promise<SceneVersion[]> {
+      const repo = getSceneRepository();
+      const versions = await repo.listVersions(sceneId);
+      this.versions = new Map(this.versions);
+      this.versions.set(sceneId, versions);
+      return versions;
+    },
+
+    /** 比较两个版本的差异 */
+    compareVersions(oldVersionId: string, newVersionId: string): VersionDiff | null {
+      let oldVersion: SceneVersion | undefined;
+      let newVersion: SceneVersion | undefined;
+      for (const versions of this.versions.values()) {
+        if (!oldVersion) oldVersion = versions.find((v) => v.versionId === oldVersionId);
+        if (!newVersion) newVersion = versions.find((v) => v.versionId === newVersionId);
+        if (oldVersion && newVersion) break;
+      }
+      if (!oldVersion || !newVersion) return null;
+      return diffVersions(oldVersion, newVersion);
     },
   },
 });

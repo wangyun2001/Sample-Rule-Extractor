@@ -42,6 +42,7 @@ const markdownDoc = ref(store.rule.markdown_doc || "");
 let unlistenRuleChunk: UnlistenFn | null = null;
 
 const template = computed(() => sceneStore.getTemplateForScene(store.scene.primary_scene, store.scene.sub_scene));
+const activeVersion = computed(() => sceneStore.getActiveVersion(store.scene.primary_scene));
 const canAnalyze = computed(() => Boolean(store.sample.selected_text.trim() && template.value));
 const hasAnalysis = computed(() => Boolean(store.rule.analysis_json));
 const loading = computed(() => store.taskStatus.rule_analysis.running);
@@ -77,7 +78,8 @@ const summary = computed(() => {
     return store.language === "zh-CN" ? "当前场景未找到模板。" : "Template not found for current scene.";
   }
   const fieldCount = templateFieldList.value.length;
-  return `${template.value.scene_name} / 字段 ${fieldCount} / 版本 ${template.value.version}`;
+  const verLabel = activeVersion.value?.semanticVersion || template.value.version;
+  return `${template.value.scene_name} / 字段 ${fieldCount} / 版本 ${verLabel}`;
 });
 
 const analysisJsonText = computed(() => {
@@ -459,6 +461,8 @@ async function runAnalyze(useStream = false) {
 
   try {
     const isRegenerate = Boolean(store.rule.analysis_json);
+    const templateVersion = activeVersion.value?.semanticVersion || template.value?.version || "unknown";
+    const templateChecksum = activeVersion.value?.checksum || "";
     let result: RuleAnalysisPackage;
     if (useStream && hasTauriRuntime()) {
       result = await invoke<RuleAnalysisPackage>("analyze_rules_ai_stream", {
@@ -467,6 +471,8 @@ async function runAnalyze(useStream = false) {
           primary_scene: store.scene.primary_scene,
           sub_scene: store.scene.sub_scene,
           template: template.value,
+          template_version: templateVersion,
+          template_checksum: templateChecksum,
           llm_config: {
             api_base_url: active.api_base_url,
             api_key: active.api_key,
@@ -483,6 +489,8 @@ async function runAnalyze(useStream = false) {
           primary_scene: store.scene.primary_scene,
           sub_scene: store.scene.sub_scene,
           template: template.value,
+          template_version: templateVersion,
+          template_checksum: templateChecksum,
           llm_config: {
             api_base_url: active.api_base_url,
             api_key: active.api_key,

@@ -2,10 +2,12 @@ import { defineStore } from "pinia";
 import type {
   SessionEventRecord,
   SessionRecord,
+  SessionSceneBinding,
   SessionManagerState,
   StepStatusState,
   WorkflowSnapshot
 } from "../types/workflow";
+import type { SceneTemplate } from "../types/workflow";
 import { deepCopy } from "../utils/copy";
 import { nowIso, cloneStepStatus } from "../utils/time";
 
@@ -47,7 +49,8 @@ export const useSessionStore = defineStore("session", {
       sampleText: string,
       stepStatus: StepStatusState,
       activeStep: 1 | 2 | 3 | 4 | 5,
-      snapshot: WorkflowSnapshot
+      snapshot: WorkflowSnapshot,
+      sceneBinding?: SessionSceneBinding
     ) {
       const createdAt = nowIso();
       const sessionId = `sess-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
@@ -66,7 +69,8 @@ export const useSessionStore = defineStore("session", {
         step_status: cloneStepStatus(stepStatus),
         current_step: activeStep,
         events: [this.createSessionEvent(2, "session_created", "Created from sample + selected scene")],
-        snapshot
+        snapshot,
+        sceneBinding
       };
       this.sessions.records.unshift(session);
       this.sessions.current_session_id = sessionId;
@@ -106,6 +110,9 @@ export const useSessionStore = defineStore("session", {
       activeStep: 1 | 2 | 3 | 4 | 5;
       runResult: { output_file: string; exit_code: number | null; last_run_id: string };
       syncSessionEvent: (step: 1 | 2 | 3 | 4 | 5, action: string, detail: string) => void;
+    }, sceneStore?: {
+      getActiveVersion: (sceneId: string) => { template: SceneTemplate } | null;
+      upsertSceneTemplate: (template: SceneTemplate) => void;
     }) {
       const target = this.sessions.records.find((item) => item.session_id === sessionId);
       if (!target) {
@@ -120,6 +127,21 @@ export const useSessionStore = defineStore("session", {
       workflowStore.stepStatus = cloneStepStatus(snapshot.stepStatus);
       workflowStore.activeStep = snapshot.activeStep;
       workflowStore.runResult = deepCopy(snapshot.runResult);
+
+      // Restore template from binding snapshot or current scene store
+      if (target.sceneBinding?.templateSnapshot) {
+        if (sceneStore) {
+          sceneStore.upsertSceneTemplate(target.sceneBinding.templateSnapshot);
+        }
+      } else if (sceneStore) {
+        const currentVersion = sceneStore.getActiveVersion(target.primary_scene);
+        if (currentVersion) {
+          sceneStore.upsertSceneTemplate(currentVersion.template);
+        } else {
+          console.warn(`[SessionStore] Historical template version unknown for session ${sessionId} (scene: ${target.primary_scene})`);
+        }
+      }
+
       this.sessions.current_session_id = sessionId;
       workflowStore.syncSessionEvent(
         workflowStore.activeStep,
@@ -145,10 +167,20 @@ export const useSessionStore = defineStore("session", {
         const parsed = JSON.parse(raw) as SessionManagerState;
         if (parsed && Array.isArray(parsed.records)) {
           this.sessions = parsed;
+          this.migrateOldSessions();
         }
       } catch {
         // ignore invalid data
       }
-    }
+    },
+
+    /** Migrate old sessions that lack version binding fields */
+    migrateOldSessions() {
+      for (const record of this.sessions.records) {
+        if (!record.sceneBinding) {
+          record.versionMismatch = true;
+        }
+      }
+    },
   }
 });

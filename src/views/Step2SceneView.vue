@@ -23,10 +23,21 @@ const routeCandidates = ref<ReturnType<typeof rankSceneCandidates>>([]);
 const classifierResult = ref<SceneClassifierResult | null>(null);
 const recommending = ref(false);
 
-const sceneCatalog = computed(() => sceneStore.sceneCatalog);
-const activePrimary = computed(() => sceneCatalog.value.find((item) => item.id === primary.value));
+const publishedIds = computed(() => new Set(sceneStore.publishedDefinitions.map((d) => d.sceneId)));
+
+const sceneCatalog = computed(() =>
+  sceneStore.sceneCatalog.filter((item) => publishedIds.value.has(item.id))
+);
+const activePrimary = computed(() => sceneStore.sceneCatalog.find((item) => item.id === primary.value));
 const showSubScene = computed(() => primary.value === REPAIR_SCENE_ID || Boolean(activePrimary.value?.subScenes?.length));
-const subScenes = computed(() => activePrimary.value?.subScenes ?? []);
+const subScenes = computed(() =>
+  (activePrimary.value?.subScenes ?? []).filter((sub) => publishedIds.value.has(sub.id))
+);
+
+const selectedVersion = computed(() => {
+  if (!primary.value) return null;
+  return sceneStore.getActiveVersion(primary.value);
+});
 
 watch(primary, () => {
   if (!showSubScene.value) {
@@ -264,6 +275,21 @@ async function goNext() {
           </option>
         </select>
       </div>
+    </div>
+
+    <div v-if="selectedVersion" class="panel">
+      <p class="muted">
+        {{ store.language === "zh-CN" ? "当前模板版本：" : "Template version: " }}
+        <strong>{{ selectedVersion.semanticVersion }}</strong>
+        <span v-if="selectedVersion.publishedAt" class="muted">
+          ({{ store.language === "zh-CN" ? "发布于" : "published" }} {{ new Date(selectedVersion.publishedAt).toLocaleDateString() }})
+        </span>
+      </p>
+    </div>
+    <div v-else-if="primary" class="panel">
+      <p class="muted">
+        {{ store.language === "zh-CN" ? "该场景暂无已发布版本。" : "No published version for this scene." }}
+      </p>
     </div>
 
     <div class="panel">
