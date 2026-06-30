@@ -9,6 +9,7 @@ import type {
   SceneVersion,
   SceneTestCase,
   SceneAuditEvent,
+  SceneTestRun,
   PublishGateResult,
 } from "../types/sceneStudio";
 import type { SceneTemplate } from "../types/workflow";
@@ -20,19 +21,34 @@ const KEYS = {
   definitions: "scene-studio.definitions",
   versions: "scene-studio.versions",
   audit: "scene-studio.audit",
+  testRuns: "scene-studio.testRuns",
   initialized: "scene-studio.initialized",
 } as const;
 
 // ─── Checksum ─────────────────────────────────────────────
 
-function computeChecksum(data: unknown): string {
-  const str = JSON.stringify(data, Object.keys(data as Record<string, unknown>).sort());
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return `sha256-${Math.abs(hash).toString(16).padStart(8, "0")}`;
+/**
+ * 递归稳定序列化：对 object keys 做字典序排列，确保相同数据始终产生相同字符串
+ */
+function stableStringify(data: unknown): string {
+  if (data === null || typeof data !== "object") return JSON.stringify(data);
+  if (Array.isArray(data)) return "[" + data.map(stableStringify).join(",") + "]";
+  const sortedKeys = Object.keys(data as Record<string, unknown>).sort();
+  return (
+    "{" +
+    sortedKeys
+      .map((k) => JSON.stringify(k) + ":" + stableStringify((data as Record<string, unknown>)[k]))
+      .join(",") +
+    "}"
+  );
+}
+
+async function computeChecksum(data: unknown): Promise<string> {
+  const stableStr = stableStringify(data);
+  const encoder = new TextEncoder();
+  const buffer = await crypto.subtle.digest("SHA-256", encoder.encode(stableStr));
+  const hashArray = Array.from(new Uint8Array(buffer));
+  return "sha256-" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // ─── localStorage helpers ────────────────────────────────
@@ -56,6 +72,7 @@ export class BrowserSceneRepository implements SceneRepository {
   private definitions: Map<string, SceneDefinition> = new Map();
   private versions: Map<string, SceneVersion> = new Map();
   private auditEvents: SceneAuditEvent[] = [];
+  private testRuns: Map<string, SceneTestRun> = new Map(); // key = versionId
 
   async initialize(): Promise<void> {
     this.definitions = new Map(
@@ -65,6 +82,8 @@ export class BrowserSceneRepository implements SceneRepository {
       loadJson<Array<[string, SceneVersion]>>(KEYS.versions, [])
     );
     this.auditEvents = loadJson<SceneAuditEvent[]>(KEYS.audit, []);
+    const runsArr = loadJson<Array<[string, SceneTestRun]>>(KEYS.testRuns, []);
+    this.testRuns = new Map(runsArr);
   }
 
   async isInitialized(): Promise<boolean> {
@@ -114,7 +133,7 @@ export class BrowserSceneRepository implements SceneRepository {
   ): Promise<SceneVersion> {
     const now = new Date().toISOString();
     const versionId = `v-${nanoid(12)}`;
-    const checksum = computeChecksum(template);
+    const checksum = await computeChecksum(template);
 
     // 确定版本号
     const existingVersions = await this.listVersions(definition.sceneId);
@@ -152,7 +171,7 @@ export class BrowserSceneRepository implements SceneRepository {
     return version;
   }
 
-  async publish(versionId: string): Promise<SceneVersion> {
+  async publish(versionId: string, options?: { force?: boolean; reason?: string; actor?: string }): Promise<SceneVersion> {
     const version = this.versions.get(versionId);
     if (!version) throw new Error(`Version ${versionId} not found`);
 
@@ -162,7 +181,12 @@ export class BrowserSceneRepository implements SceneRepository {
     // 检查发布门禁
     const gate = this.checkPublishGate(def, version);
     if (!gate.passed) {
-      throw new Error(`Publish gate failed: ${gate.blockers.join("; ")}`);
+      if (options?.force) {
+        // 强制发布：记录警告但继续
+        console.warn(`[SceneRepository] Forced publish bypassing gate: ${gate.blockers.join("; ")}`);
+      } else {
+        throw new Error(`Publish gate failed: ${gate.blockers.join("; ")}`);
+      }
     }
 
     const now = new Date().toISOString();
@@ -193,11 +217,15 @@ export class BrowserSceneRepository implements SceneRepository {
     this.definitions.set(version.sceneId, updatedDef);
     this.persist();
 
+    const auditDetail = options?.force
+      ? `FORCED publish v${version.semanticVersion} (checksum: ${version.checksum}) — reason: ${options.reason || "(none)"}${options.actor ? ` by ${options.actor}` : ""}`
+      : `Published v${version.semanticVersion} (checksum: ${version.checksum})`;
+
     await this.addAuditEvent({
       sceneId: version.sceneId,
       versionId,
       action: "publish",
-      detail: `Published v${version.semanticVersion} (checksum: ${version.checksum})`,
+      detail: auditDetail,
     });
 
     return publishedVersion;
@@ -400,6 +428,28 @@ export class BrowserSceneRepository implements SceneRepository {
       .reverse();
   }
 
+  // ─── Test Runs ───────────────────────────────────────────
+
+  async saveTestRun(run: SceneTestRun): Promise<void> {
+    this.testRuns.set(run.versionId, { ...run });
+    this.persistTestRuns();
+
+    // 从版本中查找 sceneId
+    const version = this.versions.get(run.versionId);
+    const sceneId = version?.sceneId ?? "";
+
+    await this.addAuditEvent({
+      sceneId,
+      versionId: run.versionId,
+      action: "test",
+      detail: `Test run: ${run.passed}/${run.total} passed (${(run.passRate * 100).toFixed(1)}%)`,
+    });
+  }
+
+  async getLatestTestRun(versionId: string): Promise<SceneTestRun | null> {
+    return this.testRuns.get(versionId) ?? null;
+  }
+
   // ─── Version Strategy ──────────────────────────────────
 
   private computeNextVersion(
@@ -457,10 +507,28 @@ export class BrowserSceneRepository implements SceneRepository {
       blockers.push("At least one enabled positive example is required");
     }
 
-    // 3. 至少一个测试用例
+    // 3. 测试用例与测试运行结果检查
     const enabledTests = version.testCases.filter((tc) => tc.enabled);
     if (enabledTests.length === 0) {
       warnings.push("No enabled test cases");
+    } else {
+      // 有启用的测试用例时，必须有对应的测试运行结果
+      const testRun = this.testRuns.get(version.versionId);
+      if (!testRun) {
+        blockers.push("Test run required: enabled test cases exist but no test run found for this version");
+      } else {
+        // 测试必须针对当前版本运行
+        if (testRun.versionId !== version.versionId) {
+          blockers.push("Test run version mismatch: test was run against a different version");
+        }
+        // 通过率必须 >= 90%
+        const minPassRate = 0.9;
+        if (testRun.passRate < minPassRate) {
+          blockers.push(
+            `Test pass rate ${(testRun.passRate * 100).toFixed(1)}% is below required ${(minPassRate * 100)}% (${testRun.passed}/${testRun.total} passed)`
+          );
+        }
+      }
     }
 
     return {
@@ -479,6 +547,10 @@ export class BrowserSceneRepository implements SceneRepository {
 
   private persistAudit(): void {
     saveJson(KEYS.audit, this.auditEvents);
+  }
+
+  private persistTestRuns(): void {
+    saveJson(KEYS.testRuns, Array.from(this.testRuns.entries()));
   }
 }
 

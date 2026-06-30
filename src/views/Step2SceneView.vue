@@ -7,6 +7,7 @@ import { useWorkflowStore } from "../stores/workflow";
 import { useSceneStore } from "../stores/scene";
 import { useLlmStore } from "../stores/llm";
 import { hasTauriRuntime } from "../utils/runtime";
+import { getEffectiveSceneId } from "../utils/scene";
 import { rankSceneCandidates } from "../services/sceneRouter";
 import type { SceneClassifierResult } from "../types/workflow";
 import { t, tf } from "../i18n/messages";
@@ -36,7 +37,7 @@ const subScenes = computed(() =>
 
 const selectedVersion = computed(() => {
   if (!primary.value) return null;
-  return sceneStore.getActiveVersion(primary.value);
+  return sceneStore.getActiveVersion(getEffectiveSceneId(primary.value, sub.value));
 });
 
 watch(primary, () => {

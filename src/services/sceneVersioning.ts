@@ -7,16 +7,30 @@ import type { SceneVersion, VersionDiff, VersionBumpResult } from "../types/scen
 import type { SceneTemplate } from "../types/workflow";
 
 /**
- * 计算模板 checksum
+ * 递归稳定序列化：对 object keys 做字典序排列，确保相同数据始终产生相同字符串
  */
-export function computeTemplateChecksum(template: SceneTemplate): string {
-  const stableStr = JSON.stringify(template, Object.keys(template).sort());
-  let hash = 0;
-  for (let i = 0; i < stableStr.length; i++) {
-    const char = stableStr.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return `sha256-${Math.abs(hash).toString(16).padStart(8, "0")}`;
+function stableStringify(data: unknown): string {
+  if (data === null || typeof data !== "object") return JSON.stringify(data);
+  if (Array.isArray(data)) return "[" + data.map(stableStringify).join(",") + "]";
+  const sortedKeys = Object.keys(data as Record<string, unknown>).sort();
+  return (
+    "{" +
+    sortedKeys
+      .map((k) => JSON.stringify(k) + ":" + stableStringify((data as Record<string, unknown>)[k]))
+      .join(",") +
+    "}"
+  );
+}
+
+/**
+ * 计算模板 checksum（真正的 SHA-256）
+ */
+export async function computeTemplateChecksum(template: SceneTemplate): Promise<string> {
+  const stableStr = stableStringify(template);
+  const encoder = new TextEncoder();
+  const buffer = await crypto.subtle.digest("SHA-256", encoder.encode(stableStr));
+  const hashArray = Array.from(new Uint8Array(buffer));
+  return "sha256-" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**

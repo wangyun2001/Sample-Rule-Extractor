@@ -9,6 +9,7 @@ import { useLlmStore } from "../stores/llm";
 import { usePromptStore } from "../stores/prompt";
 import { hasTauriRuntime } from "../utils/runtime";
 import { getTemplateFieldList } from "../utils/schema";
+import { getEffectiveSceneId } from "../utils/scene";
 import type { RuleAnalysisPackage, RuleChunkEvent } from "../types/workflow";
 
 const router = useRouter();
@@ -42,7 +43,7 @@ const markdownDoc = ref(store.rule.markdown_doc || "");
 let unlistenRuleChunk: UnlistenFn | null = null;
 
 const template = computed(() => sceneStore.getTemplateForScene(store.scene.primary_scene, store.scene.sub_scene));
-const activeVersion = computed(() => sceneStore.getActiveVersion(store.scene.primary_scene));
+const activeVersion = computed(() => sceneStore.getActiveVersion(getEffectiveSceneId(store.scene.primary_scene, store.scene.sub_scene)));
 const canAnalyze = computed(() => Boolean(store.sample.selected_text.trim() && template.value));
 const hasAnalysis = computed(() => Boolean(store.rule.analysis_json));
 const loading = computed(() => store.taskStatus.rule_analysis.running);

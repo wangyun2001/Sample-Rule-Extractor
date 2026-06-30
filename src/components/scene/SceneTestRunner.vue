@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { nanoid } from "nanoid";
 import { useSceneStore } from "../../stores/scene";
 import { rankSceneCandidates } from "../../services/sceneRouter";
-import type { SceneTestCase } from "../../types/sceneStudio";
+import type { SceneTestCase, SceneTestRun } from "../../types/sceneStudio";
 
 const props = defineProps<{
   /** 当前场景 ID，用于显示该场景的测试用例 */
@@ -138,6 +139,44 @@ async function runAllTests() {
 
   for (const { tc } of testCases.value) {
     runSingleTest(tc);
+  }
+
+  // 保存测试运行结果（仅在单场景模式下，关联到当前版本）
+  if (!props.allScenesMode && props.sceneId) {
+    const versions = sceneStore.versions.get(props.sceneId) || [];
+    const def = sceneStore.definitions.find((d) => d.sceneId === props.sceneId);
+    // 优先使用草稿版本，其次使用已发布版本
+    const draftVersion = versions.find((v) => !v.publishedAt);
+    const activeVersion = versions.find((v) => v.versionId === def?.activeVersionId);
+    const targetVersion = draftVersion || activeVersion;
+
+    if (targetVersion) {
+      const total = results.value.size;
+      let passed = 0;
+      const runResults: SceneTestRun["results"] = [];
+      for (const [testId, output] of results.value) {
+        if (output.passed) passed++;
+        runResults.push({
+          testCaseId: testId,
+          passed: output.passed,
+          actual: output.actualSceneId,
+          expected: output.expectedSceneId,
+        });
+      }
+
+      const testRun: SceneTestRun = {
+        runId: `run-${nanoid(8)}`,
+        versionId: targetVersion.versionId,
+        runAt: new Date().toISOString(),
+        total,
+        passed,
+        failed: total - passed,
+        passRate: total > 0 ? passed / total : 0,
+        results: runResults,
+      };
+
+      await sceneStore.saveTestRun(testRun);
+    }
   }
 
   running.value = false;

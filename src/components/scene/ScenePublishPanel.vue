@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useSceneStore } from "../../stores/scene";
-import type { PublishGateResult } from "../../types/sceneStudio";
+import type { PublishGateResult, SceneTestRun } from "../../types/sceneStudio";
 
 const props = defineProps<{
   sceneId: string;
@@ -18,6 +18,7 @@ const loading = ref(false);
 const forcePublish = ref(false);
 const forceReason = ref("");
 const publishResult = ref<{ versionId: string; checksum: string } | null>(null);
+const lastTestRun = ref<SceneTestRun | null>(null);
 
 const gateResult = computed<PublishGateResult>(() => {
   return sceneStore.checkPublishGateForVersion(props.sceneId, props.versionId);
@@ -28,12 +29,20 @@ const canPublish = computed(() => {
   return forcePublish.value && forceReason.value.trim().length > 0;
 });
 
+// 加载测试运行结果
+onMounted(async () => {
+  lastTestRun.value = await sceneStore.getLatestTestRun(props.versionId);
+});
+
 async function handlePublish() {
   if (!canPublish.value) return;
   loading.value = true;
   publishResult.value = null;
   try {
-    const result = await sceneStore.publish(props.versionId);
+    const opts = !gateResult.value.passed && forcePublish.value
+      ? { force: true, reason: forceReason.value.trim() }
+      : undefined;
+    const result = await sceneStore.publish(props.versionId, opts);
     publishResult.value = {
       versionId: result.versionId,
       checksum: result.checksum,
@@ -77,6 +86,25 @@ async function handlePublish() {
       <div v-if="gateResult.passed && gateResult.warnings.length === 0" class="gate-item gate-item--pass">
         <span class="gate-item__icon">V</span>
         <span class="gate-item__text">所有门禁检查通过</span>
+      </div>
+    </div>
+
+    <!-- Test Run Status -->
+    <div v-if="lastTestRun" class="test-run-status">
+      <div class="test-run-status__title">测试运行结果</div>
+      <div class="test-run-status__row">
+        <span class="test-run-status__label">通过率:</span>
+        <span
+          class="test-run-status__value"
+          :class="{ ok: lastTestRun.passRate >= 0.9, danger: lastTestRun.passRate < 0.9 }"
+        >
+          {{ (lastTestRun.passRate * 100).toFixed(1) }}%
+        </span>
+        <span class="test-run-status__detail">({{ lastTestRun.passed }}/{{ lastTestRun.total }} 通过)</span>
+      </div>
+      <div class="test-run-status__row">
+        <span class="test-run-status__label">运行时间:</span>
+        <span class="test-run-status__value">{{ new Date(lastTestRun.runAt).toLocaleString() }}</span>
       </div>
     </div>
 
@@ -283,5 +311,48 @@ async function handlePublish() {
   background: #e1f3d8;
   padding: 2px 6px;
   border-radius: 3px;
+}
+
+.test-run-status {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.test-run-status__title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #606266;
+  margin-bottom: 8px;
+}
+
+.test-run-status__row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.test-run-status__label {
+  color: #909399;
+  flex-shrink: 0;
+}
+
+.test-run-status__value.ok {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.test-run-status__value.danger {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.test-run-status__detail {
+  color: #909399;
+  font-size: 12px;
 }
 </style>

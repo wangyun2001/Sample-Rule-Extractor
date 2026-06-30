@@ -10,6 +10,7 @@ import type {
 import type { SceneTemplate } from "../types/workflow";
 import { deepCopy } from "../utils/copy";
 import { nowIso, cloneStepStatus } from "../utils/time";
+import { getEffectiveSceneId } from "../utils/scene";
 
 const STORAGE_KEY = "sample-rule-extractor.session.v1";
 
@@ -134,11 +135,12 @@ export const useSessionStore = defineStore("session", {
           sceneStore.upsertSceneTemplate(target.sceneBinding.templateSnapshot);
         }
       } else if (sceneStore) {
-        const currentVersion = sceneStore.getActiveVersion(target.primary_scene);
+        const effectiveSceneId = getEffectiveSceneId(target.primary_scene, target.sub_scene);
+        const currentVersion = sceneStore.getActiveVersion(effectiveSceneId);
         if (currentVersion) {
           sceneStore.upsertSceneTemplate(currentVersion.template);
         } else {
-          console.warn(`[SessionStore] Historical template version unknown for session ${sessionId} (scene: ${target.primary_scene})`);
+          console.warn(`[SessionStore] Historical template version unknown for session ${sessionId} (scene: ${effectiveSceneId})`);
         }
       }
 

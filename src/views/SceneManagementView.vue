@@ -334,6 +334,10 @@ async function saveDraft() {
 // ─── Actions ─────────────────────────────────────────────
 
 async function handlePublish(versionId: string) {
+  if (sceneStore.degradationMode) {
+    statusMessage.value = "降级模式下禁止发布操作";
+    return;
+  }
   try {
     await sceneStore.publish(versionId);
     statusMessage.value = t(store.language, "scene.publishedMsg");
@@ -414,6 +418,11 @@ watch(
     <!-- Browser mode warning -->
     <div v-if="browserModeWarning" class="banner warning">
       {{ t(store.language, "scene.browserWarning") }}
+    </div>
+
+    <!-- Degradation mode warning -->
+    <div v-if="sceneStore.degradationMode" class="banner degradation">
+      ⚠️ 持久化加载失败，当前处于只读恢复模式。原因：{{ sceneStore.degradationReason || "未知错误" }}
     </div>
 
     <h2>{{ t(store.language, "scene.title") }}</h2>
@@ -523,8 +532,9 @@ watch(
             <button :class="{ active: activeTab === 'versions' }" @click="activeTab = 'versions'">
               {{ t(store.language, "scene.tabVersions") }}
             </button>
-            <button :class="{ active: activeTab === 'publish' }" @click="activeTab = 'publish'">
+            <button :class="{ active: activeTab === 'publish' }" :disabled="sceneStore.degradationMode" @click="activeTab = 'publish'">
               {{ t(store.language, "scene.tabPublish") }}
+              <span v-if="sceneStore.degradationMode" style="font-size:10px">(不可用)</span>
             </button>
             <button :class="{ active: activeTab === 'audit' }" @click="activeTab = 'audit'">
               {{ t(store.language, "scene.tabAudit") }}
@@ -639,8 +649,11 @@ watch(
 
           <!-- Publish tab -->
           <div v-if="activeTab === 'publish'" class="tab-content">
+            <div v-if="sceneStore.degradationMode" class="banner degradation">
+              降级模式下无法发布。请修复持久化问题后重新加载。
+            </div>
             <ScenePublishPanel
-              v-if="selectedSceneId && activeVersion"
+              v-else-if="selectedSceneId && activeVersion"
               :scene-id="selectedSceneId"
               :version-id="activeVersion.versionId"
               @published="handlePublish"
@@ -840,6 +853,7 @@ watch(
 .banner.warning { background: #fff3e0; color: #e65100; }
 .banner.error { background: #fce4ec; color: #c62828; }
 .banner.info { background: #e3f2fd; color: #1565c0; }
+.banner.degradation { background: #fff8e1; color: #e65100; border: 2px solid #ffb300; font-weight: 600; padding: 12px 16px; }
 
 .banner ul {
   margin: 0;

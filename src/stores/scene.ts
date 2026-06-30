@@ -5,6 +5,7 @@ import type {
   SceneVersion,
   SceneTestCase,
   SceneAuditEvent,
+  SceneTestRun,
   PublishGateResult,
 } from "../types/sceneStudio";
 import {
@@ -27,10 +28,15 @@ interface SceneStoreState {
   definitions: SceneDefinition[];
   versions: Map<string, SceneVersion[]>;
   auditEvents: SceneAuditEvent[];
+  // 测试运行缓存（key = versionId）
+  _testRunCache: Map<string, SceneTestRun>;
   // 状态
   initialized: boolean;
   loading: boolean;
   error: string | null;
+  // 降级模式
+  degradationMode: boolean;
+  degradationReason: string;
 }
 
 export const useSceneStore = defineStore("scene", {
@@ -40,9 +46,12 @@ export const useSceneStore = defineStore("scene", {
     definitions: [],
     versions: new Map(),
     auditEvents: [],
+    _testRunCache: new Map(),
     initialized: false,
     loading: false,
     error: null,
+    degradationMode: false,
+    degradationReason: "",
   }),
 
   getters: {
@@ -74,6 +83,20 @@ export const useSceneStore = defineStore("scene", {
         return versions.find((v) => v.versionId === def.activeVersionId) || null;
       };
     },
+
+    /** 获取场景的最新草稿版本（未发布的版本） */
+    getDraftVersion(state) {
+      return (sceneId: string): SceneVersion | null => {
+        const versions = state.versions.get(sceneId) || [];
+        // 找最新的未发布版本（没有 publishedAt 的版本）
+        return versions.find((v) => !v.publishedAt) || null;
+      };
+    },
+
+    /** 是否处于降级模式（禁止发布操作） */
+    isDegraded(state): boolean {
+      return state.degradationMode;
+    },
   },
 
   actions: {
@@ -104,6 +127,8 @@ export const useSceneStore = defineStore("scene", {
         this.sceneCatalog = createDefaultSceneCatalog();
         this.sceneTemplates = createDefaultTemplateMap();
         this.initialized = true;
+        this.degradationMode = true;
+        this.degradationReason = String(err);
       } finally {
         this.loading = false;
       }
@@ -121,6 +146,20 @@ export const useSceneStore = defineStore("scene", {
         versionsMap.set(def.sceneId, versions);
       }
       this.versions = versionsMap;
+
+      // 刷新测试运行缓存
+      if (repo.getLatestTestRun) {
+        const testRunCache = new Map<string, SceneTestRun>();
+        for (const versions of versionsMap.values()) {
+          for (const v of versions) {
+            const run = await repo.getLatestTestRun(v.versionId);
+            if (run) {
+              testRunCache.set(v.versionId, run);
+            }
+          }
+        }
+        this._testRunCache = testRunCache;
+      }
 
       // 同步到兼容层：重建 sceneCatalog 和 sceneTemplates
       this.rebuildCompatibilityLayer();
@@ -160,12 +199,17 @@ export const useSceneStore = defineStore("scene", {
         catalog.push(primary);
       }
 
-      // 重建模板映射：使用已发布版本的模板
+      // 重建模板映射：优先使用草稿版本模板，其次使用已发布版本模板
       for (const def of this.definitions) {
         if (def.status === "archived") continue;
-        const activeVersion = this.getActiveVersion(def.sceneId);
-        if (activeVersion) {
-          templateMap[def.sceneId] = activeVersion.template;
+        const draftVersion = this.getDraftVersion(def.sceneId);
+        if (draftVersion) {
+          templateMap[def.sceneId] = draftVersion.template;
+        } else {
+          const activeVersion = this.getActiveVersion(def.sceneId);
+          if (activeVersion) {
+            templateMap[def.sceneId] = activeVersion.template;
+          }
         }
       }
 
@@ -241,9 +285,9 @@ export const useSceneStore = defineStore("scene", {
     },
 
     /** 发布版本 */
-    async publish(versionId: string): Promise<SceneVersion> {
+    async publish(versionId: string, options?: { force?: boolean; reason?: string; actor?: string }): Promise<SceneVersion> {
       const repo = getSceneRepository();
-      const version = await repo.publish(versionId);
+      const version = await repo.publish(versionId, options);
       await this.refreshFromRepository();
       return version;
     },
@@ -300,7 +344,32 @@ export const useSceneStore = defineStore("scene", {
       if (!def || !version) {
         return { passed: false, blockers: ["场景或版本不存在"], warnings: [] };
       }
-      return checkPublishGate(def, version.template, version.testCases);
+      // 从仓储获取该版本的最近测试运行结果
+      const testRun = this._testRunCache.get(versionId) ?? null;
+      return checkPublishGate(def, version.template, version.testCases, testRun);
+    },
+
+    /** 保存测试运行结果 */
+    async saveTestRun(run: SceneTestRun): Promise<void> {
+      const repo = getSceneRepository();
+      if (repo.saveTestRun) {
+        await repo.saveTestRun(run);
+      }
+      // 更新本地缓存
+      this._testRunCache.set(run.versionId, run);
+    },
+
+    /** 获取某版本最近一次测试运行结果 */
+    async getLatestTestRun(versionId: string): Promise<SceneTestRun | null> {
+      const repo = getSceneRepository();
+      if (repo.getLatestTestRun) {
+        const run = await repo.getLatestTestRun(versionId);
+        if (run) {
+          this._testRunCache.set(versionId, run);
+        }
+        return run;
+      }
+      return this._testRunCache.get(versionId) ?? null;
     },
 
     /** 加载指定场景的版本列表到缓存 */

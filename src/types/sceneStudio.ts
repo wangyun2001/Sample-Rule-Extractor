@@ -109,8 +109,14 @@ export interface SceneRepository {
   /** 保存草稿（创建或更新场景定义 + 草稿版本） */
   saveDraft(definition: SceneDefinition, template: SceneTemplate, testCases: SceneTestCase[], changelog: string): Promise<SceneVersion>;
 
-  /** 发布版本（创建不可变快照，更新场景状态） */
-  publish(versionId: string): Promise<SceneVersion>;
+  /** 发布版本（创建不可变快照，更新场景状态）。force=true 时跳过门禁，reason 记入审计日志 */
+  publish(versionId: string, options?: { force?: boolean; reason?: string; actor?: string }): Promise<SceneVersion>;
+
+  /** 保存测试运行结果（可选实现） */
+  saveTestRun?(run: SceneTestRun): Promise<void>;
+
+  /** 获取某版本最近一次测试运行结果（可选实现） */
+  getLatestTestRun?(versionId: string): Promise<SceneTestRun | null>;
 
   /** 禁用场景 */
   disable(sceneId: string): Promise<void>;
@@ -138,6 +144,24 @@ export interface SceneRepository {
 
   /** 检查是否已初始化过（用于首次启动判断） */
   isInitialized(): Promise<boolean>;
+}
+
+// ─── 测试运行结果 ──────────────────────────────────────────
+
+export interface SceneTestRun {
+  runId: string;
+  versionId: string;
+  runAt: string;
+  total: number;
+  passed: number;
+  failed: number;
+  passRate: number;
+  results: Array<{
+    testCaseId: string;
+    passed: boolean;
+    actual: string;
+    expected: string;
+  }>;
 }
 
 // ─── 版本号策略 ──────────────────────────────────────────

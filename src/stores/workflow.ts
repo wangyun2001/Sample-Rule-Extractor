@@ -17,7 +17,7 @@ import { useLlmStore } from "./llm";
 import { usePromptStore } from "./prompt";
 import { normalizeSceneSchema } from "../utils/schema";
 import { deepCopy } from "../utils/copy";
-import { normalizeSceneId } from "../utils/scene";
+import { normalizeSceneId, getEffectiveSceneId } from "../utils/scene";
 import { nowIso, cloneStepStatus } from "../utils/time";
 
 const STORAGE_KEY = "sample-rule-extractor.workflow.v2";
@@ -386,11 +386,12 @@ export const useWorkflowStore = defineStore("workflow", {
 
       // Build scene version binding
       const sceneStore = useSceneStore();
-      const activeVersion = sceneStore.getActiveVersion(primaryScene);
+      const effectiveId = getEffectiveSceneId(primaryScene, subScene);
+      const activeVersion = sceneStore.getActiveVersion(effectiveId);
       const template = sceneStore.getTemplateForScene(primaryScene, subScene);
       const sceneBinding = activeVersion && template
         ? {
-            sceneId: primaryScene,
+            sceneId: effectiveId,
             sceneVersionId: activeVersion.versionId,
             templateVersion: activeVersion.semanticVersion || template.version || "unknown",
             templateChecksum: activeVersion.checksum || "",
@@ -516,7 +517,8 @@ export const useWorkflowStore = defineStore("workflow", {
         return;
       }
       const active = llmStore.getActiveLlmConfig();
-      const activeVersion = sceneStore.getActiveVersion(this.scene.primary_scene);
+      const effectiveId = getEffectiveSceneId(this.scene.primary_scene, this.scene.sub_scene);
+      const activeVersion = sceneStore.getActiveVersion(effectiveId);
       const promptOverride = promptStore.rulePrompt.template
         .replace("{{primary_scene}}", this.scene.primary_scene || "")
         .replace("{{sub_scene}}", this.scene.sub_scene || "")

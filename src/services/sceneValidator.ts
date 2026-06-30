@@ -3,7 +3,7 @@
  * 校验场景定义、模板、测试用例的完整性和一致性
  */
 
-import type { SceneDefinition, SceneTestCase, PublishGateResult } from "../types/sceneStudio";
+import type { SceneDefinition, SceneTestCase, SceneTestRun, PublishGateResult } from "../types/sceneStudio";
 import type { SceneTemplate } from "../types/workflow";
 
 export interface ValidationError {
@@ -140,11 +140,15 @@ export function validateTestCase(tc: SceneTestCase): ValidationResult {
 
 /**
  * 综合发布门禁检查
+ * @param lastTestRun - 当前版本的最近测试运行结果（可选）
+ * @param minPassRate - 最低通过率阈值，默认 0.9（90%）
  */
 export function checkPublishGate(
   def: SceneDefinition,
   template: SceneTemplate,
-  testCases: SceneTestCase[]
+  testCases: SceneTestCase[],
+  lastTestRun?: SceneTestRun | null,
+  minPassRate = 0.9
 ): PublishGateResult {
   const blockers: string[] = [];
   const warnings: string[] = [];
@@ -172,10 +176,22 @@ export function checkPublishGate(
     blockers.push("至少需要一个启用的正样本示例");
   }
 
-  // 4. 测试用例检查
+  // 4. 测试用例与测试运行结果检查
   const enabledTests = testCases.filter((tc) => tc.enabled);
   if (enabledTests.length === 0) {
     warnings.push("没有启用的测试用例");
+  } else {
+    // 有启用的测试用例时，必须有对应的测试运行结果
+    if (!lastTestRun) {
+      blockers.push("需要运行测试：存在启用的测试用例但未找到测试运行结果");
+    } else {
+      // 通过率必须 >= 阈值
+      if (lastTestRun.passRate < minPassRate) {
+        blockers.push(
+          `测试通过率 ${(lastTestRun.passRate * 100).toFixed(1)}% 低于要求的 ${(minPassRate * 100)}%（${lastTestRun.passed}/${lastTestRun.total} 通过）`
+        );
+      }
+    }
   }
 
   return {

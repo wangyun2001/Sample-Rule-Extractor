@@ -15,8 +15,27 @@ const hasRun = ref(false);
 
 const maxCandidates = 5;
 
-// Draft template map: from sceneStore.sceneTemplates (includes draft changes)
-const draftTemplateMap = computed(() => sceneStore.sceneTemplates);
+// Draft template map: from getDraftVersion (truly unpublished drafts), fallback to sceneTemplates
+const draftTemplateMap = computed(() => {
+  const map: Record<string, SceneTemplate> = {};
+  for (const def of sceneStore.definitions) {
+    if (def.status === "archived") continue;
+    const draftVersion = sceneStore.getDraftVersion(def.sceneId);
+    if (draftVersion) {
+      map[def.sceneId] = draftVersion.template;
+    } else {
+      // 没有草稿时回退到当前 sceneTemplates（可能来自已发布版本）
+      const tpl = sceneStore.sceneTemplates[def.sceneId];
+      if (tpl) map[def.sceneId] = tpl;
+    }
+  }
+  return map;
+});
+
+// Check if a scene has a true draft (unpublished version)
+function hasDraft(sceneId: string): boolean {
+  return sceneStore.getDraftVersion(sceneId) !== null;
+}
 
 // Published template map: from active published versions only
 const publishedTemplateMap = computed(() => {
@@ -115,9 +134,10 @@ function confidenceDiff(candidate: SceneRouteCandidate, publishedList: SceneRout
         <!-- Draft Panel -->
         <div class="test-bench__panel">
           <h4>
-            当前草稿
+            当前编辑中的模板
             <span class="muted">({{ draftCandidates.length }} 候选)</span>
           </h4>
+          <p class="muted" style="font-size:11px;margin:0 0 8px">使用草稿版本（如有），否则回退到已发布版本</p>
           <div v-if="draftCandidates.length === 0" class="muted">无匹配候选</div>
           <div
             v-for="(candidate, idx) in draftCandidates"
@@ -127,6 +147,7 @@ function confidenceDiff(candidate: SceneRouteCandidate, publishedList: SceneRout
             <div class="candidate-header">
               <span class="candidate-rank">#{{ idx + 1 }}</span>
               <span class="candidate-name">{{ candidate.scene_name }}</span>
+              <span v-if="hasDraft(candidate.primary_scene)" class="draft-tag">草稿</span>
               <span class="candidate-score">
                 得分: {{ candidate.score }}
                 <span
@@ -162,6 +183,7 @@ function confidenceDiff(candidate: SceneRouteCandidate, publishedList: SceneRout
             已发布版本
             <span class="muted">({{ publishedCandidates.length }} 候选)</span>
           </h4>
+          <p class="muted" style="font-size:11px;margin:0 0 8px">仅使用已发布的 active version 模板</p>
           <div v-if="publishedCandidates.length === 0" class="muted">无匹配候选</div>
           <div
             v-for="(candidate, idx) in publishedCandidates"
@@ -245,6 +267,17 @@ function confidenceDiff(candidate: SceneRouteCandidate, publishedList: SceneRout
 
 .candidate-name {
   font-weight: 600;
+}
+
+.draft-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
 }
 
 .candidate-score,
