@@ -7,6 +7,7 @@ import type {
   StepStatusState,
   TaskStatus,
   TaskType,
+  VehicleInfo,
   WorkflowSnapshot,
   WorkflowState
 } from "../types/workflow";
@@ -42,7 +43,16 @@ const initialStepStatus: StepStatusState = {
 
 interface CoreWorkflowState {
   language: AppLanguage;
-  sample: { selected_text: string; source_type: "" | "selected_text" | "clipboard" };
+  vehicleInfo: VehicleInfo;
+  sample: {
+    selected_text: string;
+    source_type: "" | "selected_text" | "clipboard" | "file_import";
+    source_chapter: string;
+    page_number: string;
+    detected_components: string[];
+    fault_symptom: string;
+    vehicle_status: string[];
+  };
   scene: { primary_scene: string; sub_scene: string };
   rule: {
     analysis_json: RuleAnalysisPackage | null;
@@ -58,10 +68,30 @@ interface CoreWorkflowState {
   taskStatus: Record<TaskType, TaskStatus>;
 }
 
+function createTaskId(): string {
+  return `T-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(16).slice(2, 6).toUpperCase()}`;
+}
+
 function createInitialState(): CoreWorkflowState {
   return {
     language: "zh-CN",
-    sample: { selected_text: "", source_type: "" },
+    vehicleInfo: {
+      platform: "S07",
+      power_type: "pure_ev",
+      material_type: "circuit_diagram",
+      task_id: createTaskId(),
+      created_at: new Date().toISOString(),
+      doc_version: ""
+    },
+    sample: {
+      selected_text: "",
+      source_type: "",
+      source_chapter: "",
+      page_number: "",
+      detected_components: [],
+      fault_symptom: "",
+      vehicle_status: []
+    },
     scene: { primary_scene: "", sub_scene: "" },
     rule: { analysis_json: null, markdown_doc: "", markdown_doc_edited: false, confirmed: false },
     script: { extract_py: "", config_json: "", generated: false },
@@ -279,6 +309,7 @@ export const useWorkflowStore = defineStore("workflow", {
     /* ── Snapshot ── */
     captureSnapshot(): WorkflowSnapshot {
       return {
+        vehicleInfo: deepCopy(this.vehicleInfo),
         sample: deepCopy(this.sample),
         scene: deepCopy(this.scene),
         rule: deepCopy(this.rule),
@@ -340,8 +371,16 @@ export const useWorkflowStore = defineStore("workflow", {
       }
     },
 
-    /* ── Step 1: Sample ── */
-    setSample(text: string, sourceType: "selected_text" | "clipboard") {
+    /* ── Step 1: Vehicle & Sample ── */
+    setVehicleInfo(info: Partial<VehicleInfo>) {
+      Object.assign(this.vehicleInfo, info);
+      this.persistState();
+    },
+    setSampleChapter(chapter: string) {
+      this.sample.source_chapter = chapter;
+      this.persistState();
+    },
+    setSample(text: string, sourceType: "selected_text" | "clipboard" | "file_import") {
       this.sample.selected_text = text;
       this.sample.source_type = sourceType;
       if (!text.trim()) {
@@ -359,6 +398,11 @@ export const useWorkflowStore = defineStore("workflow", {
     clearSample() {
       this.sample.selected_text = "";
       this.sample.source_type = "";
+      this.sample.source_chapter = "";
+      this.sample.page_number = "";
+      this.sample.detected_components = [];
+      this.sample.fault_symptom = "";
+      this.sample.vehicle_status = [];
       this.stepStatus = { ...initialStepStatus };
       this.clearDownstreamFromStep(1);
       const sessionStore = useSessionStore();
@@ -392,7 +436,8 @@ export const useWorkflowStore = defineStore("workflow", {
         this.sample.selected_text,
         this.stepStatus,
         this.activeStep,
-        this.captureSnapshot()
+        this.captureSnapshot(),
+        deepCopy(this.vehicleInfo)
       );
       this.syncSessionEvent(2, "scene_selected", `primary=${primaryScene}, sub=${subScene || "-"}`);
     },

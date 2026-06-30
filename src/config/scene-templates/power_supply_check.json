@@ -1,0 +1,47 @@
+{
+  "scene_id": "power_supply_check",
+  "scene_name": "电源供电链路检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册电源供电相关章节中抽取电源电路检查步骤、电压测量值、供电路径信息。",
+  "context_keywords": [
+    "电源", "供电", "蓄电池", "电池电压", "常电", "ACC电", "IG电",
+    "B+", "供电电路", "电源线", "正极", "负极", "电压降",
+    "供电链路", "电源输入", "工作电压"
+  ],
+  "title_aliases": [
+    "电源电路检查", "供电系统检查", "电源供电检查", "供电链路检查"
+  ],
+  "required_semantic_roles": [
+    "voltage_value", "test_point"
+  ],
+  "optional_semantic_roles": [
+    "circuit_path", "normal_range", "measurement_tool", "reference_section"
+  ],
+  "header_alias": {
+    "test_point": ["测试点", "测量位置", "检测部位"],
+    "voltage_value": ["电压", "电压值", "测量值"],
+    "normal_range": ["标准值", "正常范围", "规格值"]
+  },
+  "content_features": [
+    "电压测量", "供电路径", "电源电路图"
+  ],
+  "structure_patterns": [
+    "电源|电压", "供电|检查", "蓄电池|电压"
+  ],
+  "output_schema": [
+    { "field": "test_point", "type": "string", "required": true, "description": "测试点/测量位置" },
+    { "field": "voltage_value", "type": "string", "required": false, "description": "测量电压值" },
+    { "field": "normal_range", "type": "string", "required": false, "description": "标准电压范围" },
+    { "field": "circuit_path", "type": "string", "required": false, "description": "供电电路路径" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以实测值为准"
+  },
+  "examples": []
+}

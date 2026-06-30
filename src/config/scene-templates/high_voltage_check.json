@@ -1,0 +1,51 @@
+{
+  "scene_id": "high_voltage_check",
+  "scene_name": "高压系统资料与安全检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册高压系统相关章节中抽取高压组件信息、安全操作规程、绝缘检测步骤及高压安全警告。",
+  "context_keywords": [
+    "高压", "HV", "高压系统", "动力电池", "驱动电机", "逆变器",
+    "高压线束", "高压接插件", "绝缘检测", "高压安全", "维修开关",
+    "MSD", "放电", "高压互锁", "橙色线束", "高压警告"
+  ],
+  "title_aliases": [
+    "高压系统检查", "高压安全检查", "高压系统资料与安全检查"
+  ],
+  "required_semantic_roles": [
+    "hv_component", "safety_procedure"
+  ],
+  "optional_semantic_roles": [
+    "insulation_value", "discharge_time", "warning_level", "ppe_requirement"
+  ],
+  "header_alias": {
+    "hv_component": ["高压组件", "高压部件", "HV组件"],
+    "safety_procedure": ["安全规程", "操作规程", "安全步骤"],
+    "insulation_value": ["绝缘电阻", "绝缘值"],
+    "discharge_time": ["放电时间", "等待时间"]
+  },
+  "content_features": [
+    "高压", "绝缘", "安全"
+  ],
+  "structure_patterns": [
+    "高压|安全", "绝缘|检测", "动力电池|电压"
+  ],
+  "output_schema": [
+    { "field": "hv_component", "type": "string", "required": true, "description": "高压组件名称" },
+    { "field": "safety_procedure", "type": "string", "required": true, "description": "安全操作规程" },
+    { "field": "insulation_value", "type": "string", "required": false, "description": "绝缘电阻要求" },
+    { "field": "warning_level", "type": "string", "required": false, "description": "警告级别" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "高压操作必须由具备资质人员执行",
+    "操作前必须断开维修开关并等待放电"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述并附加安全警告",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以最严格安全标准为准"
+  },
+  "examples": []
+}

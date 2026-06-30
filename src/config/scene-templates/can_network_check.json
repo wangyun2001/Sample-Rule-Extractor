@@ -1,0 +1,48 @@
+{
+  "scene_id": "can_network_check",
+  "scene_name": "CAN/CANFD 网络通信检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册CAN/CANFD网络通信相关章节中抽取网络拓扑、模块通信状态、总线电阻及诊断步骤。",
+  "context_keywords": [
+    "CAN", "CANFD", "CAN总线", "网络通信", "通信故障", "总线",
+    "CAN-H", "CAN-L", "终端电阻", "模块通信", "网络拓扑",
+    "通信线路", "数据总线", "高速CAN", "低速CAN"
+  ],
+  "title_aliases": [
+    "CAN检查", "CANFD检查", "网络通信检查", "CAN总线检查", "CAN/CANFD网络通信检查"
+  ],
+  "required_semantic_roles": [
+    "bus_type", "module_name"
+  ],
+  "optional_semantic_roles": [
+    "terminal_resistance", "bus_voltage", "communication_status", "network_topology"
+  ],
+  "header_alias": {
+    "bus_type": ["总线类型", "网络类型", "通信类型"],
+    "module_name": ["模块名称", "控制单元", "ECU"],
+    "terminal_resistance": ["终端电阻", "电阻值"],
+    "bus_voltage": ["总线电压", "CAN-H电压", "CAN-L电压"]
+  },
+  "content_features": [
+    "CAN", "CANFD", "总线", "通信"
+  ],
+  "structure_patterns": [
+    "CAN|通信", "总线|电阻", "模块|网络"
+  ],
+  "output_schema": [
+    { "field": "bus_type", "type": "string", "required": true, "description": "总线类型(CAN/CANFD)" },
+    { "field": "module_name", "type": "string", "required": true, "description": "相关模块名称" },
+    { "field": "terminal_resistance", "type": "string", "required": false, "description": "终端电阻值" },
+    { "field": "bus_voltage", "type": "string", "required": false, "description": "总线电压" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以诊断仪数据为准"
+  },
+  "examples": []
+}

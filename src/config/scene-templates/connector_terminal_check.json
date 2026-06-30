@@ -1,0 +1,47 @@
+{
+  "scene_id": "connector_terminal_check",
+  "scene_name": "接插件与端子检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册接插件、连接器、端子相关章节中抽取接插件编号、端子排列、检查步骤及故障状态。",
+  "context_keywords": [
+    "接插件", "连接器", "端子", "插接件", "插头", "插座",
+    "CONNECTOR", "端子排列", "端子检查", "接触不良", "腐蚀",
+    "虚接", "松动", "端子退针"
+  ],
+  "title_aliases": [
+    "接插件检查", "端子检查", "连接器检查", "接插件与端子检查"
+  ],
+  "required_semantic_roles": [
+    "connector_id", "terminal_no"
+  ],
+  "optional_semantic_roles": [
+    "pin_count", "terminal_function", "inspection_result", "fault_condition"
+  ],
+  "header_alias": {
+    "connector_id": ["接插件编号", "连接器编号", "插接件编号"],
+    "terminal_no": ["端子号", "针脚号", "PIN号"],
+    "terminal_function": ["端子功能", "用途", "信号名称"]
+  },
+  "content_features": [
+    "接插件", "端子", "连接器"
+  ],
+  "structure_patterns": [
+    "接插件|端子", "连接器|检查", "插头|针脚"
+  ],
+  "output_schema": [
+    { "field": "connector_id", "type": "string", "required": true, "description": "接插件编号" },
+    { "field": "terminal_no", "type": "string", "required": true, "description": "端子号" },
+    { "field": "terminal_function", "type": "string", "required": false, "description": "端子功能" },
+    { "field": "fault_condition", "type": "string", "required": false, "description": "故障状态描述" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以手册标注为准"
+  },
+  "examples": []
+}

@@ -3,9 +3,83 @@ export type AppLanguage = "zh-CN" | "en-US";
 
 export type OutputFormat = "xlsx" | "csv" | "json" | "md";
 
+export type PowerType = "pure_ev" | "range_extender";
+export type MaterialType =
+  | "circuit_diagram"
+  | "repair_method"
+  | "ground_point"
+  | "harness_connector_location"
+  | "connector_front_view"
+  | "high_voltage_harness";
+
+export interface VehicleInfo {
+  platform: string;
+  power_type: PowerType;
+  material_type: MaterialType;
+  task_id: string;
+  created_at: string;
+  doc_version: string;
+}
+
+export type DiagnosticSceneType =
+  | "symptom_extraction"
+  | "dtc_extraction"
+  | "repair_steps"
+  | "power_supply_check"
+  | "ground_circuit_check"
+  | "fuse_relay_check"
+  | "connector_terminal_check"
+  | "wire_continuity_check"
+  | "can_network_check"
+  | "high_voltage_check";
+
+export interface CircuitDiagnosticRule {
+  systemName: string;
+  systemCode: string;
+  faultSymptom: string;
+  possibleCauses: string[];
+  preConditions: string[];
+  targetComponent: string;
+  powerSource: string;
+  fuseRelay: string;
+  groundPoint: string;
+  connectorCode: string;
+  terminalPosition: string;
+  wireColor: string;
+  wireGauge: string;
+  sharedCircuit: string;
+  recommendedTool: string;
+  measurementMethod: string;
+  normalCondition: string;
+  abnormalCondition: string;
+  nextStep: string;
+  safetyWarning: string;
+  sourceDocument: string;
+  sourceSection: string;
+  sourcePage: string;
+  sourceText: string;
+}
+
+export interface DiagnosticChain {
+  powerSource?: string;
+  fuseRelay?: string;
+  controller?: string;
+  actuator?: string;
+  sensor?: string;
+  connector?: string;
+  groundPoint?: string;
+  canSegment?: string;
+  sharedNodes?: string[];
+}
+
 export interface SampleState {
   selected_text: string;
-  source_type: "" | "selected_text" | "clipboard";
+  source_type: "" | "selected_text" | "clipboard" | "file_import";
+  source_chapter: string;
+  page_number: string;
+  detected_components: string[];
+  fault_symptom: string;
+  vehicle_status: string[];
 }
 
 export interface SceneState {
@@ -78,6 +152,7 @@ export interface SessionEventRecord {
 }
 
 export interface WorkflowSnapshot {
+  vehicleInfo: VehicleInfo;
   sample: SampleState;
   scene: SceneState;
   rule: RuleState;
@@ -98,6 +173,7 @@ export interface SessionRecord {
   sample_preview: string;
   primary_scene: string;
   sub_scene: string;
+  vehicle_info: VehicleInfo;
   step_status: StepStatusState;
   current_step: 1 | 2 | 3 | 4 | 5;
   events: SessionEventRecord[];
@@ -133,6 +209,10 @@ export interface WorkflowState {
   language: AppLanguage;
   sceneCatalog: PrimarySceneOption[];
   sceneTemplates: Record<string, SceneTemplate>;
+  vehicleInfo: VehicleInfo;
+  diagnosticScene: DiagnosticSceneType;
+  diagnosticRules: CircuitDiagnosticRule[];
+  diagnosticChain: DiagnosticChain;
   sample: SampleState;
   scene: SceneState;
   rule: RuleState;

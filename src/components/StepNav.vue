@@ -2,13 +2,14 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWorkflowStore } from "../stores/workflow";
-import LlmConfigPanel from "./LlmConfigPanel.vue";
+import { useLlmStore } from "../stores/llm";
 import type { AppLanguage, TaskType } from "../types/workflow";
 import { stepStatusText, t, taskText } from "../i18n/messages";
 
 const router = useRouter();
 const route = useRoute();
 const store = useWorkflowStore();
+const llmStore = useLlmStore();
 
 const steps = computed(() => [
   { id: 1, title: t(store.language, "step.1.title"), subtitle: t(store.language, "step.1.subtitle") },
@@ -36,12 +37,40 @@ const languageOptions: Array<{ value: AppLanguage; label: string }> = [
 const isSessionPage = computed(() => route.name === "sessions");
 const isScenePage = computed(() => route.name === "scenes");
 
+const vehicleSummary = computed(() => {
+  const v = store.vehicleInfo;
+  const platform = v.platform || "-";
+  const power = v.power_type === "pure_ev" ? "纯电" : v.power_type === "range_extender" ? "增程" : v.power_type;
+  return `${platform} / ${power}`;
+});
+
+const llmStatusText = computed(() => {
+  const active = llmStore.activeLlmConfig;
+  if (!active?.api_key) return t(store.language, "vehicle.llmNotConfigured");
+  const test = active.last_test;
+  if (test?.success) return `${t(store.language, "vehicle.llmConnected")} (${active.model})`;
+  return active.model || t(store.language, "vehicle.llmNotConfigured");
+});
+
+const llmStatusOk = computed(() => {
+  const active = llmStore.activeLlmConfig;
+  return active?.api_key && active.last_test?.success;
+});
+
 function getStatus(stepId: number) {
   return store.getStepStatus(stepId);
 }
 
 function statusText(stepId: number) {
   return stepStatusText(store.language, getStatus(stepId));
+}
+
+function statusIcon(stepId: number): string {
+  const status = getStatus(stepId);
+  if (status === "done") return "✓";
+  if (status === "current") return "●";
+  if (status === "stale") return "⟳";
+  return "○";
 }
 
 function isClickable(stepId: number) {
@@ -71,26 +100,13 @@ async function backToFlow() {
 
 <template>
   <aside class="step-nav">
+    <!-- Header -->
     <div class="step-nav__header">
       <h1>{{ t(store.language, "app.title") }}</h1>
       <p>{{ t(store.language, "app.subtitle") }}</p>
-      <label>{{ t(store.language, "common.language") }}</label>
-      <select :value="store.language" @change="store.setLanguage(($event.target as HTMLSelectElement).value as AppLanguage)">
-        <option v-for="item in languageOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-      </select>
-      <div class="actions">
-        <button type="button" :class="{ primary: isSessionPage }" @click="goSessions">
-          {{ t(store.language, "common.sessionPage") }}
-        </button>
-        <button type="button" :class="{ primary: isScenePage }" @click="goScenes">
-          {{ t(store.language, "common.scenePage") }}
-        </button>
-        <button v-if="isSessionPage || isScenePage" type="button" @click="backToFlow">
-          {{ t(store.language, "common.backToFlow") }}
-        </button>
-      </div>
     </div>
 
+    <!-- Step list -->
     <ol class="step-nav__list">
       <li v-for="step in steps" :key="step.id">
         <button
@@ -103,16 +119,19 @@ async function backToFlow() {
           type="button"
           @click="goStep(step.id)"
         >
-          <span class="step-nav__index">{{ step.id }}</span>
+          <span class="step-nav__status-icon" :class="`icon-${getStatus(step.id)}`">
+            {{ statusIcon(step.id) }}
+          </span>
           <span class="step-nav__meta">
             <strong>{{ step.title }}</strong>
             <small>{{ step.subtitle }}</small>
           </span>
-          <span class="step-nav__status">{{ statusText(step.id) }}</span>
+          <span class="step-nav__status-text">{{ statusText(step.id) }}</span>
         </button>
       </li>
     </ol>
 
+    <!-- Task status -->
     <section v-if="taskItems.length" class="side-card">
       <h3>{{ t(store.language, "task.title") }}</h3>
       <div v-for="item in taskItems" :key="item.task" class="task-item">
@@ -135,6 +154,71 @@ async function backToFlow() {
       </div>
     </section>
 
-    <LlmConfigPanel />
+    <!-- Bottom info section -->
+    <div class="step-nav__footer">
+      <!-- Vehicle summary -->
+      <div class="step-nav__info-row">
+        <span class="step-nav__info-icon">&#128663;</span>
+        <div class="step-nav__info-content">
+          <span class="step-nav__info-label">{{ t(store.language, "vehicle.vehicleSummary") }}</span>
+          <span class="step-nav__info-value">{{ vehicleSummary }}</span>
+        </div>
+      </div>
+
+      <!-- LLM status -->
+      <div class="step-nav__info-row">
+        <span class="step-nav__info-icon" :class="{ 'is-ok': llmStatusOk }">&#9889;</span>
+        <div class="step-nav__info-content">
+          <span class="step-nav__info-label">{{ t(store.language, "vehicle.llmStatus") }}</span>
+          <span class="step-nav__info-value" :class="{ 'is-ok': llmStatusOk }">{{ llmStatusText }}</span>
+        </div>
+      </div>
+
+      <!-- Language switcher -->
+      <div class="step-nav__info-row">
+        <span class="step-nav__info-icon">&#127760;</span>
+        <div class="step-nav__info-content">
+          <span class="step-nav__info-label">{{ t(store.language, "common.language") }}</span>
+          <select
+            class="step-nav__lang-select"
+            :value="store.language"
+            @change="store.setLanguage(($event.target as HTMLSelectElement).value as AppLanguage)"
+          >
+            <option v-for="item in languageOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="step-nav__divider" />
+
+      <!-- Session & Scene management links -->
+      <div class="step-nav__link-group">
+        <button
+          type="button"
+          class="step-nav__link-btn"
+          :class="{ 'is-active-link': isSessionPage }"
+          @click="goSessions"
+        >
+          &#128203; {{ t(store.language, "common.sessionPage") }}
+        </button>
+        <button
+          type="button"
+          class="step-nav__link-btn"
+          :class="{ 'is-active-link': isScenePage }"
+          @click="goScenes"
+        >
+          &#128193; {{ t(store.language, "vehicle.sceneAssets") }}
+        </button>
+        <button
+          v-if="isSessionPage || isScenePage"
+          type="button"
+          class="step-nav__link-btn"
+          @click="backToFlow"
+        >
+          &#8592; {{ t(store.language, "common.backToFlow") }}
+        </button>
+      </div>
+    </div>
   </aside>
 </template>

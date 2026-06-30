@@ -1,0 +1,46 @@
+{
+  "scene_id": "ground_circuit_check",
+  "scene_name": "接地回路检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册接地相关章节中抽取接地点位置、接地电阻值、接地回路检查步骤。",
+  "context_keywords": [
+    "接地", "搭铁", "接地点", "接地线", "接地回路", "接地电阻",
+    "GND", "车身接地", "搭铁点", "接地不良", "接地检查"
+  ],
+  "title_aliases": [
+    "接地回路检查", "搭铁检查", "接地系统检查"
+  ],
+  "required_semantic_roles": [
+    "ground_point", "resistance_value"
+  ],
+  "optional_semantic_roles": [
+    "ground_location", "normal_range", "measurement_tool", "reference_section"
+  ],
+  "header_alias": {
+    "ground_point": ["接地点", "搭铁点", "接地位置"],
+    "resistance_value": ["电阻值", "接地电阻"],
+    "ground_location": ["位置描述", "安装位置"]
+  },
+  "content_features": [
+    "接地点", "接地电阻", "搭铁检查"
+  ],
+  "structure_patterns": [
+    "接地|检查", "搭铁|电阻", "接地点|位置"
+  ],
+  "output_schema": [
+    { "field": "ground_point", "type": "string", "required": true, "description": "接地点编号/名称" },
+    { "field": "ground_location", "type": "string", "required": false, "description": "接地点位置描述" },
+    { "field": "resistance_value", "type": "string", "required": false, "description": "接地电阻测量值" },
+    { "field": "normal_range", "type": "string", "required": false, "description": "标准电阻范围" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以实测值为准"
+  },
+  "examples": []
+}
