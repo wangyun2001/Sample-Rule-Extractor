@@ -1,0 +1,48 @@
+{
+  "scene_id": "wire_continuity_check",
+  "scene_name": "线束导通、短路与压降检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册线束检查相关章节中抽取导通性测试、短路检测、压降测量的步骤和标准值。",
+  "context_keywords": [
+    "线束", "导通", "短路", "压降", "断路", "导线",
+    "导通性", "短路检测", "电压降", "线路检查", "线束检查",
+    "WIRE HARNESS", "导通测试", "对地短路", "对电源短路"
+  ],
+  "title_aliases": [
+    "线束检查", "导通检查", "短路检测", "压降检查", "线束导通短路与压降检查"
+  ],
+  "required_semantic_roles": [
+    "wire_path", "test_type"
+  ],
+  "optional_semantic_roles": [
+    "resistance_value", "voltage_drop", "normal_range", "test_method", "reference_section"
+  ],
+  "header_alias": {
+    "wire_path": ["线束路径", "导线", "线路"],
+    "test_type": ["检测类型", "检查类型", "测试项目"],
+    "resistance_value": ["电阻值", "导通电阻"],
+    "voltage_drop": ["压降", "电压降"]
+  },
+  "content_features": [
+    "线束", "导通", "压降"
+  ],
+  "structure_patterns": [
+    "线束|导通", "短路|检测", "压降|测量"
+  ],
+  "output_schema": [
+    { "field": "wire_path", "type": "string", "required": true, "description": "线束路径/编号" },
+    { "field": "test_type", "type": "string", "required": true, "description": "检测类型(导通/短路/压降)" },
+    { "field": "normal_range", "type": "string", "required": false, "description": "标准值范围" },
+    { "field": "test_method", "type": "string", "required": false, "description": "检测方法" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以实测值为准"
+  },
+  "examples": []
+}

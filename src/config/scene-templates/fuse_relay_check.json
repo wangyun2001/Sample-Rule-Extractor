@@ -1,0 +1,47 @@
+{
+  "scene_id": "fuse_relay_check",
+  "scene_name": "保险丝与继电器检查",
+  "scene_type": "primary",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册保险丝盒、继电器相关章节中抽取保险丝编号、额定电流、继电器类型及检查步骤。",
+  "context_keywords": [
+    "保险丝", "熔断丝", "熔丝", "继电器", "保险丝盒", "熔断器",
+    "FUSE", "RELAY", "保险丝编号", "额定电流", "保险丝位置"
+  ],
+  "title_aliases": [
+    "保险丝检查", "继电器检查", "保险丝与继电器检查", "保险丝盒检查"
+  ],
+  "required_semantic_roles": [
+    "fuse_id", "rated_current"
+  ],
+  "optional_semantic_roles": [
+    "fuse_location", "relay_type", "protected_circuit", "reference_section"
+  ],
+  "header_alias": {
+    "fuse_id": ["保险丝编号", "熔丝编号", "FUSE编号"],
+    "rated_current": ["额定电流", "容量", "安培数"],
+    "fuse_location": ["位置", "安装位置", "保险丝盒位置"],
+    "protected_circuit": ["保护电路", "功能说明", "供电对象"]
+  },
+  "content_features": [
+    "保险丝", "继电器", "额定电流"
+  ],
+  "structure_patterns": [
+    "保险丝|电流", "继电器|检查", "熔断丝|位置"
+  ],
+  "output_schema": [
+    { "field": "fuse_id", "type": "string", "required": true, "description": "保险丝编号" },
+    { "field": "rated_current", "type": "string", "required": true, "description": "额定电流(A)" },
+    { "field": "fuse_location", "type": "string", "required": false, "description": "保险丝位置" },
+    { "field": "protected_circuit", "type": "string", "required": false, "description": "保护电路/功能" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以手册标注为准"
+  },
+  "examples": []
+}

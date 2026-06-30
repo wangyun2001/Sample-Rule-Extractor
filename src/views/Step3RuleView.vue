@@ -47,6 +47,11 @@ const hasAnalysis = computed(() => Boolean(store.rule.analysis_json));
 const loading = computed(() => store.taskStatus.rule_analysis.running);
 const message = computed(() => store.taskStatus.rule_analysis.message);
 const exampleList = computed(() => (template.value?.examples ?? []).filter((ex) => ex.enabled !== false));
+const analysisJson = computed(() => store.rule.analysis_json as Record<string, any> | null);
+const isHighVoltageScene = computed(() => {
+  const scene = store.scene.primary_scene;
+  return scene === "high_voltage_check" || scene === "power_supply_check";
+});
 
 const templateFieldList = computed(() => getTemplateFieldList(template.value?.output_schema));
 
@@ -791,6 +796,101 @@ async function goNext() {
         <button type="button" class="primary" @click="applyManualAliasMap">
           {{ store.language === "zh-CN" ? "应用字段同义词对照" : "Apply Synonym Map" }}
         </button>
+      </div>
+    </div>
+
+    <!-- 电路诊断规则卡片 -->
+    <div v-if="hasAnalysis" class="panel circuit-rules">
+      <h3>{{ store.language === "zh-CN" ? "🔧 电路诊断规则" : "🔧 Circuit Diagnostic Rules" }}</h3>
+
+      <!-- 来源事实（蓝色左边框） -->
+      <div v-if="analysisJson?.source_text || analysisJson?.source_section" class="evidence-card source-fact">
+        <h4>{{ store.language === "zh-CN" ? "📋 来源事实" : "📋 Source Facts" }}</h4>
+        <div class="fact-grid">
+          <div v-if="analysisJson?.source_document"><strong>{{ store.language === "zh-CN" ? "资料来源" : "Source" }}:</strong> {{ analysisJson.source_document }}</div>
+          <div v-if="analysisJson?.source_section"><strong>{{ store.language === "zh-CN" ? "章节" : "Section" }}:</strong> {{ analysisJson.source_section }}</div>
+          <div v-if="analysisJson?.source_page"><strong>{{ store.language === "zh-CN" ? "页码" : "Page" }}:</strong> {{ analysisJson.source_page }}</div>
+          <div v-if="analysisJson?.source_text" class="source-text">
+            <strong>{{ store.language === "zh-CN" ? "原始文字" : "Original Text" }}:</strong>
+            <pre>{{ analysisJson.source_text }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI推理建议（橙色左边框） -->
+      <div v-if="analysisJson?.possible_causes || analysisJson?.next_step" class="evidence-card ai-inference">
+        <h4>{{ store.language === "zh-CN" ? "🤖 AI 推理建议（非手册原文）" : "🤖 AI Inference (Not from manual)" }}</h4>
+        <div v-if="analysisJson?.possible_causes" class="inference-item">
+          <strong>{{ store.language === "zh-CN" ? "可能原因" : "Possible Causes" }}:</strong>
+          <ul><li v-for="(cause, i) in (Array.isArray(analysisJson.possible_causes) ? analysisJson.possible_causes : [analysisJson.possible_causes])" :key="i">{{ cause }}</li></ul>
+        </div>
+        <div v-if="analysisJson?.next_step" class="inference-item">
+          <strong>{{ store.language === "zh-CN" ? "建议检查" : "Suggested Check" }}:</strong> {{ analysisJson.next_step }}
+        </div>
+      </div>
+
+      <!-- 电路链路信息 -->
+      <div class="circuit-info-grid">
+        <div v-if="analysisJson?.system_name" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "系统名称" : "System" }}</span>
+          <span class="field-value">{{ analysisJson.system_name }}{{ analysisJson.system_code ? ` (${analysisJson.system_code})` : '' }}</span>
+        </div>
+        <div v-if="analysisJson?.target_component" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "目标元件" : "Component" }}</span>
+          <span class="field-value">{{ analysisJson.target_component }}</span>
+        </div>
+        <div v-if="analysisJson?.power_source" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "电源来源" : "Power" }}</span>
+          <span class="field-value">{{ analysisJson.power_source }}</span>
+        </div>
+        <div v-if="analysisJson?.fuse_relay" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "保险丝/继电器" : "Fuse/Relay" }}</span>
+          <span class="field-value">{{ analysisJson.fuse_relay }}</span>
+        </div>
+        <div v-if="analysisJson?.ground_point" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "接地点" : "Ground" }}</span>
+          <span class="field-value">{{ analysisJson.ground_point }}</span>
+        </div>
+        <div v-if="analysisJson?.connector_code" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "接插件" : "Connector" }}</span>
+          <span class="field-value">{{ analysisJson.connector_code }}{{ analysisJson.terminal_position ? `-${analysisJson.terminal_position}` : '' }}</span>
+        </div>
+        <div v-if="analysisJson?.wire_color || analysisJson?.wire_gauge" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "导线" : "Wire" }}</span>
+          <span class="field-value">{{ analysisJson.wire_color || '-' }} / {{ analysisJson.wire_gauge || '-' }}</span>
+        </div>
+        <div v-if="analysisJson?.shared_circuit" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "共享电路" : "Shared" }}</span>
+          <span class="field-value">{{ analysisJson.shared_circuit }}</span>
+        </div>
+        <div v-if="analysisJson?.recommended_tool" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "检测工具" : "Tool" }}</span>
+          <span class="field-value">{{ analysisJson.recommended_tool }}</span>
+        </div>
+        <div v-if="analysisJson?.measurement_method" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "测量方式" : "Method" }}</span>
+          <span class="field-value">{{ analysisJson.measurement_method }}</span>
+        </div>
+        <div v-if="analysisJson?.normal_condition" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "正常条件" : "Normal" }}</span>
+          <span class="field-value ok">{{ analysisJson.normal_condition }}</span>
+        </div>
+        <div v-if="analysisJson?.abnormal_condition" class="circuit-field">
+          <span class="field-label">{{ store.language === "zh-CN" ? "异常条件" : "Abnormal" }}</span>
+          <span class="field-value err">{{ analysisJson.abnormal_condition }}</span>
+        </div>
+      </div>
+
+      <!-- 安全警告 -->
+      <div v-if="analysisJson?.safety_warning" class="safety-warning-box">
+        <strong>⚠️ {{ store.language === "zh-CN" ? "安全注意事项" : "Safety Warning" }}:</strong>
+        <span>{{ analysisJson.safety_warning }}</span>
+      </div>
+
+      <!-- 高压警告 -->
+      <div v-if="isHighVoltageScene" class="hv-warning-box">
+        <strong>🔴 {{ store.language === "zh-CN" ? "高压系统警告" : "High Voltage Warning" }}:</strong>
+        <span>{{ store.language === "zh-CN" ? "涉及高压系统的诊断必须由具备高压作业资质的人员执行，操作前必须断开高压维修开关并等待放电完成。" : "HV system diagnosis must be performed by qualified personnel. Disconnect HV service switch and wait for discharge before operation." }}</span>
       </div>
     </div>
 

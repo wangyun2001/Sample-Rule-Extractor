@@ -1,0 +1,46 @@
+{
+  "scene_id": "repair_adjust",
+  "scene_name": "调整步骤抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P1",
+  "description": "从维修手册调整步骤相关章节中抽取调整项目、调整方法、标准值及注意事项。",
+  "context_keywords": [
+    "调整", "调节", "校准", "标定", "间隙调整", "张力调整",
+    "调整步骤", "调整方法", "调整标准"
+  ],
+  "title_aliases": [
+    "调整步骤", "调整方法", "校准步骤"
+  ],
+  "required_semantic_roles": [
+    "adjust_item", "adjust_method"
+  ],
+  "optional_semantic_roles": [
+    "standard_value", "adjust_tool", "warning_note", "reference_section"
+  ],
+  "header_alias": {
+    "adjust_item": ["调整项目", "调整内容"],
+    "adjust_method": ["调整方法", "调整步骤"],
+    "standard_value": ["标准值", "规格值", "调整标准"]
+  },
+  "content_features": [
+    "调整", "校准", "标定"
+  ],
+  "structure_patterns": [
+    "调整|步骤", "校准|方法", "间隙|调整"
+  ],
+  "output_schema": [
+    { "field": "adjust_item", "type": "string", "required": true, "description": "调整项目" },
+    { "field": "adjust_method", "type": "string", "required": true, "description": "调整方法/步骤" },
+    { "field": "standard_value", "type": "string", "required": false, "description": "标准值" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以手册标注为准"
+  },
+  "examples": []
+}

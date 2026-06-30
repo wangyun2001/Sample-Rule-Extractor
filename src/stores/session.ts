@@ -4,6 +4,7 @@ import type {
   SessionRecord,
   SessionManagerState,
   StepStatusState,
+  VehicleInfo,
   WorkflowSnapshot
 } from "../types/workflow";
 import { deepCopy } from "../utils/copy";
@@ -47,7 +48,8 @@ export const useSessionStore = defineStore("session", {
       sampleText: string,
       stepStatus: StepStatusState,
       activeStep: 1 | 2 | 3 | 4 | 5,
-      snapshot: WorkflowSnapshot
+      snapshot: WorkflowSnapshot,
+      vehicleInfo: VehicleInfo
     ) {
       const createdAt = nowIso();
       const sessionId = `sess-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
@@ -63,6 +65,7 @@ export const useSessionStore = defineStore("session", {
         sample_preview: preview,
         primary_scene: primaryScene,
         sub_scene: subScene,
+        vehicle_info: vehicleInfo,
         step_status: cloneStepStatus(stepStatus),
         current_step: activeStep,
         events: [this.createSessionEvent(2, "session_created", "Created from sample + selected scene")],
@@ -96,8 +99,15 @@ export const useSessionStore = defineStore("session", {
     setCurrentSessionId(sessionId: string) {
       this.sessions.current_session_id = sessionId;
     },
+    deleteSession(sessionId: string) {
+      this.sessions.records = this.sessions.records.filter((r) => r.session_id !== sessionId);
+      if (this.sessions.current_session_id === sessionId) {
+        this.sessions.current_session_id = "";
+      }
+      this.persistState();
+    },
     loadSession(sessionId: string, workflowStore: {
-      sample: { selected_text: string; source_type: "" | "selected_text" | "clipboard" };
+      sample: { selected_text: string; source_type: "" | "selected_text" | "clipboard" | "file_import" };
       scene: { primary_scene: string; sub_scene: string };
       rule: { analysis_json: unknown; markdown_doc: string; markdown_doc_edited: boolean; confirmed: boolean };
       script: { extract_py: string; config_json: string; generated: boolean };

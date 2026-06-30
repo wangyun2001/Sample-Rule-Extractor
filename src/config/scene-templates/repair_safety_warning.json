@@ -1,0 +1,49 @@
+{
+  "scene_id": "repair_safety_warning",
+  "scene_name": "注意事项与安全警告抽取",
+  "scene_type": "sub",
+  "parent_scene_id": "repair_plan_steps",
+  "version": "1.0.0",
+  "priority": "P0",
+  "description": "从维修手册注意事项、安全警告相关章节中抽取警告等级、警告内容、适用场景及防护要求。",
+  "context_keywords": [
+    "注意", "警告", "危险", "安全", "注意事项", "安全警告",
+    "警告标识", "安全须知", "防护措施", "禁止", "严禁"
+  ],
+  "title_aliases": [
+    "注意事项", "安全警告", "安全须知", "注意事项与安全警告"
+  ],
+  "required_semantic_roles": [
+    "warning_level", "warning_content"
+  ],
+  "optional_semantic_roles": [
+    "applicable_scope", "ppe_requirement", "consequence", "reference_section"
+  ],
+  "header_alias": {
+    "warning_level": ["警告等级", "等级", "级别"],
+    "warning_content": ["警告内容", "注意事项", "安全警告"],
+    "applicable_scope": ["适用范围", "适用场景"]
+  },
+  "content_features": [
+    "警告", "注意", "安全"
+  ],
+  "structure_patterns": [
+    "警告|内容", "注意|事项", "安全|措施"
+  ],
+  "output_schema": [
+    { "field": "warning_level", "type": "string", "required": true, "description": "警告等级(危险/警告/注意)" },
+    { "field": "warning_content", "type": "string", "required": true, "description": "警告内容" },
+    { "field": "applicable_scope", "type": "string", "required": false, "description": "适用范围" },
+    { "field": "consequence", "type": "string", "required": false, "description": "违反后果" }
+  ],
+  "mapping_rules": [],
+  "validation_rules": [
+    "安全警告必须完整保留，不得省略"
+  ],
+  "fallback_strategy": {
+    "low_confidence": "保留原文描述",
+    "missing_fields": "标记为空",
+    "conflict_resolution": "以最严格安全标准为准"
+  },
+  "examples": []
+}
