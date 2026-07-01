@@ -157,18 +157,50 @@ function flattenScenes(sceneCatalog: PrimarySceneOption[]): Array<{ primary: str
   return list;
 }
 
+export interface RankOptions {
+  /** 只返回 enabled 的场景（需要 definitions 传入） */
+  enabledOnly?: boolean;
+  /** 只返回 status === "published" 的场景（需要 definitions 传入） */
+  publishedOnly?: boolean;
+  /** 场景定义列表，用于过滤 disabled/unpublished */
+  definitions?: Array<{ sceneId: string; enabled: boolean; status: string }>;
+  /** 返回的最大候选数，默认返回全部 */
+  topN?: number;
+}
+
 export function rankSceneCandidates(
   sampleText: string,
   sceneCatalog: PrimarySceneOption[],
-  templateMap: Record<string, SceneTemplate>
+  templateMap: Record<string, SceneTemplate>,
+  options?: RankOptions
 ): SceneRouteCandidate[] {
   const sample = normalizeText(sampleText.trim());
   if (!sample) {
     return [];
   }
 
+  // 构建过滤集合
+  const disabledIds = new Set<string>();
+  const unpublishedIds = new Set<string>();
+  if (options?.definitions) {
+    for (const def of options.definitions) {
+      if (options.enabledOnly && !def.enabled) {
+        disabledIds.add(def.sceneId);
+      }
+      if (options.publishedOnly && def.status !== "published") {
+        unpublishedIds.add(def.sceneId);
+      }
+    }
+  }
+
   const scenes = flattenScenes(sceneCatalog);
   const scored = scenes
+    .filter((scene) => {
+      const sceneId = scene.sub || scene.primary;
+      if (disabledIds.has(sceneId)) return false;
+      if (unpublishedIds.has(sceneId)) return false;
+      return true;
+    })
     .map((scene) => {
       const template = templateMap[scene.sub || scene.primary];
       if (!template) {
@@ -188,8 +220,10 @@ export function rankSceneCandidates(
     .sort((a, b) => b.score - a.score);
 
   const topScore = Math.max(scored[0]?.score ?? 1, 1);
-  return scored.map((item) => ({
+  const result = scored.map((item) => ({
     ...item,
     confidence: Number(Math.min(1, Math.max(0, item.score / topScore)).toFixed(2))
   }));
+
+  return options?.topN ? result.slice(0, options.topN) : result;
 }

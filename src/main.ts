@@ -17,8 +17,13 @@ app.use(pinia);
 // Hydrate sub-stores first (they read from their own localStorage keys)
 void useLlmStore(pinia);
 void useSessionStore(pinia);
-void useSceneStore(pinia);
+const sceneStore = useSceneStore(pinia);
 void usePromptStore(pinia);
+
+// Initialize scene repository (async, non-blocking)
+sceneStore.initializeRepository().catch((err) => {
+  console.error("[main] Scene repository initialization failed:", err);
+});
 
 // Hydrate workflow store (reads from legacy combined key and distributes to sub-stores)
 const workflowStore = useWorkflowStore(pinia);

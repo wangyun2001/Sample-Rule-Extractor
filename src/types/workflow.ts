@@ -88,6 +88,14 @@ export interface WorkflowSnapshot {
   runResult: RunResultState;
 }
 
+export interface SessionSceneBinding {
+  sceneId: string;
+  sceneVersionId: string;
+  templateVersion: string;
+  templateChecksum: string;
+  templateSnapshot: SceneTemplate;
+}
+
 export interface SessionRecord {
   session_id: string;
   title: string;
@@ -102,6 +110,8 @@ export interface SessionRecord {
   current_step: 1 | 2 | 3 | 4 | 5;
   events: SessionEventRecord[];
   snapshot: WorkflowSnapshot;
+  sceneBinding?: SessionSceneBinding;
+  versionMismatch?: boolean;
 }
 
 export interface SessionManagerState {
